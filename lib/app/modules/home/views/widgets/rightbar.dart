@@ -1,0 +1,188 @@
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:projectka_pos/app/routes/app_pages.dart';
+import 'package:projectka_pos/core/constant/color.constant.dart';
+import 'package:projectka_pos/core/constant/rightbar.constant.dart';
+import 'package:projectka_pos/core/utils/dialog.util.dart';
+import 'package:projectka_pos/services/local/pdf_services.dart';
+
+class Rightbar extends StatelessWidget {
+  const Rightbar({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return ListView(
+          controller: ScrollController(),
+          children: [
+            Card(
+              color: Colors.white60,
+              margin: const EdgeInsets.only(
+                top: 24,
+                right: 24,
+                bottom: 24,
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              elevation: 0.5,
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  children: [
+                    Image.asset(
+                      'assets/images/avatar/ava_female.png',
+                      width: 64,
+                    ),
+                    const SizedBox(
+                      height: 8,
+                    ),
+                    if (constraints.maxWidth > 128)
+                      const Text(
+                        'Tria Hutagalung',
+                        style: TextStyle(fontSize: 12),
+                        textAlign: TextAlign.center,
+                      ),
+                    const SizedBox(
+                      height: 12,
+                    ),
+                    if (constraints.maxWidth > 128)
+                      ElevatedButton(
+                        onPressed: () {
+                          Get.defaultDialog(
+                            contentPadding: const EdgeInsets.all(16),
+                            title: 'Keluar Aplikasi',
+                            middleText:
+                                'Apakah kamu yakin ingin keluar aplikasi ?',
+                            textConfirm: 'Ya',
+                            textCancel: 'Tidak',
+                            buttonColor: ColorConstant.primaryColor,
+                            confirmTextColor: Colors.white,
+                            cancelTextColor: ColorConstant.primaryColor,
+                            onConfirm: () {
+                              Get.back();
+                              Get.toNamed(Routes.LOGIN);
+                            },
+                            onCancel: () => Get.back(),
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          primary: Colors.black87,
+                          elevation: 0.5,
+                          shape: const RoundedRectangleBorder(
+                            borderRadius: BorderRadius.all(
+                              Radius.circular(10),
+                            ),
+                          ),
+                          minimumSize: const Size.fromHeight(40),
+                        ),
+                        child: const Text(
+                          'Keluar',
+                          style: TextStyle(fontSize: 10),
+                        ),
+                      )
+                  ],
+                ),
+              ),
+            ),
+            Card(
+              color: Colors.white60,
+              elevation: 0.5,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              margin: const EdgeInsets.only(
+                right: 24,
+                bottom: 24,
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const Text(
+                      'Aksi Cepat',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(
+                      height: 8,
+                    ),
+                    ListView.builder(
+                      shrinkWrap: true,
+                      primary: false,
+                      padding: EdgeInsets.zero,
+                      itemCount: RightbarConstant.actionList.length,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemBuilder: (context, index) {
+                        if (constraints.maxWidth > 172) {
+                          return Container(
+                            margin: const EdgeInsets.symmetric(vertical: 8),
+                            decoration: BoxDecoration(
+                              color: ColorConstant.backgroundColor,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: ListTile(
+                              onTap: () {
+                                switch (index) {
+                                  case 0:
+                                    DialogUtil.showDialogAddProduct(context);
+                                    break;
+                                  case 1:
+                                    DialogUtil.showDialogAddTransaction(
+                                      context,
+                                    );
+                                    break;
+                                  case 2:
+                                    PdfServices.buildPdf(true);
+                                    break;
+                                  case 3:
+                                    PdfServices.buildPdf(false);
+                                    break;
+                                }
+                              },
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              title: Text(
+                                RightbarConstant.actionList[index]['title'],
+                                style: const TextStyle(fontSize: 11),
+                              ),
+                              trailing: Icon(
+                                RightbarConstant.actionList[index]['icon'],
+                                size: 20,
+                                color: Colors.black87,
+                              ),
+                            ),
+                          );
+                        }
+                        return Container(
+                          width: 40,
+                          margin: const EdgeInsets.symmetric(vertical: 8),
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: ColorConstant.backgroundColor,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Icon(
+                            RightbarConstant.actionList[index]['icon'],
+                            size: 20,
+                            color: Colors.black87,
+                          ),
+                        );
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            )
+          ],
+        );
+      },
+    );
+  }
+}
