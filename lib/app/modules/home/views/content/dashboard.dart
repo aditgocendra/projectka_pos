@@ -23,10 +23,9 @@ class Dashboard extends StatelessWidget {
               ),
               itemCount: DashboardConstant.headerCard.length,
               itemBuilder: (context, index) {
-                return Card(
-                  elevation: 0.5,
-                  color: Colors.white60,
-                  shape: RoundedRectangleBorder(
+                return Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white60,
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: Container(
@@ -88,13 +87,10 @@ class CardLastTransaction extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: 0.5,
-      color: Colors.white60,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.all(
-          Radius.circular(16),
-        ),
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white60,
+        borderRadius: BorderRadius.circular(16),
       ),
       child: Theme(
         data: Theme.of(context).copyWith(

@@ -13,10 +13,9 @@ class ManageProduct extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: 0.5,
-      color: Colors.white60,
-      shape: RoundedRectangleBorder(
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white60,
         borderRadius: BorderRadius.circular(16),
       ),
       child: Padding(

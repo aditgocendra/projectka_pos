@@ -16,17 +16,12 @@ class Rightbar extends StatelessWidget {
         return ListView(
           controller: ScrollController(),
           children: [
-            Card(
-              color: Colors.white60,
-              margin: const EdgeInsets.only(
-                top: 24,
-                right: 24,
-                bottom: 24,
+            Container(
+              margin: const EdgeInsets.only(bottom: 24, right: 24, top: 24),
+              decoration: BoxDecoration(
+                color: Colors.white60,
+                borderRadius: BorderRadius.circular(16),
               ),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              elevation: 0.5,
               child: Padding(
                 padding: const EdgeInsets.all(16),
                 child: Column(
@@ -86,15 +81,11 @@ class Rightbar extends StatelessWidget {
                 ),
               ),
             ),
-            Card(
-              color: Colors.white60,
-              elevation: 0.5,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              margin: const EdgeInsets.only(
-                right: 24,
-                bottom: 24,
+            Container(
+              margin: const EdgeInsets.only(bottom: 24, right: 24),
+              decoration: BoxDecoration(
+                color: Colors.white60,
+                borderRadius: BorderRadius.circular(16),
               ),
               child: Padding(
                 padding: const EdgeInsets.all(16),
