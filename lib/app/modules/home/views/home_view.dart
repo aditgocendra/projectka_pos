@@ -51,7 +51,7 @@ class HomeView extends GetView<HomeController> {
                           content = const ManageTransaction();
                           break;
                         case 3:
-                          content = const ManageUser();
+                          content = ManageUser();
                           break;
                         default:
                           content = const Dashboard();
