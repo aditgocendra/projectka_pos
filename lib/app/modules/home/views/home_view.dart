@@ -45,7 +45,7 @@ class HomeView extends GetView<HomeController> {
                       Widget content;
                       switch (controller.indexSidebarSelected.value) {
                         case 1:
-                          content = const ManageProduct();
+                          content = ManageProduct();
                           break;
                         case 2:
                           content = const ManageTransaction();

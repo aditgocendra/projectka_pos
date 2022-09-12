@@ -11,6 +11,7 @@ class DialogUtil {
       context: context,
       builder: (context) => DialogFormProduct(
         titleForm: 'Tambah Produk',
+        action: false,
       ),
     );
   }
