@@ -8,4 +8,10 @@ class StringUtil {
       decimalDigits: 0,
     ).format(num);
   }
+
+  static String dMMMyFormat(DateTime dateTime) {
+    return DateFormat('d MMM y', 'id').format(
+      dateTime,
+    );
+  }
 }
