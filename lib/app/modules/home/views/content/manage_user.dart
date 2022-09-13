@@ -576,241 +576,244 @@ class UserTable extends StatelessWidget {
             child: SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               controller: mUserController.scrollHorizontalTable,
-              child: DataTable(
-                dataRowHeight: 80,
-                columns: const [
-                  DataColumn(
-                    label: Expanded(
-                      child: Center(
-                        child: Text(
-                          'Nomor',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
+              child: Theme(
+                data: Theme.of(context)
+                    .copyWith(dividerColor: ColorConstant.primaryColor),
+                child: DataTable(
+                  dataRowHeight: 80,
+                  columns: const [
+                    DataColumn(
+                      label: Expanded(
+                        child: Center(
+                          child: Text(
+                            'Nomor',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
                       ),
                     ),
-                  ),
-                  DataColumn(
-                    label: Expanded(
-                      child: Center(
-                        child: Text(
-                          'Nama Pengguna',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
+                    DataColumn(
+                      label: Expanded(
+                        child: Center(
+                          child: Text(
+                            'Nama Pengguna',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
                       ),
                     ),
-                  ),
-                  DataColumn(
-                    label: Expanded(
-                      child: Center(
-                        child: Text(
-                          'Email',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
+                    DataColumn(
+                      label: Expanded(
+                        child: Center(
+                          child: Text(
+                            'Email',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
                       ),
                     ),
-                  ),
-                  DataColumn(
-                    label: Expanded(
-                      child: Center(
-                        child: Text(
-                          'Peran',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
+                    DataColumn(
+                      label: Expanded(
+                        child: Center(
+                          child: Text(
+                            'Peran',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
                       ),
                     ),
-                  ),
-                  DataColumn(
-                    label: Expanded(
-                      child: Center(
-                        child: Text(
-                          'Aksi',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
+                    DataColumn(
+                      label: Expanded(
+                        child: Center(
+                          child: Text(
+                            'Aksi',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
                       ),
                     ),
-                  ),
-                ],
-                rows: mUserController.listUsers
-                    .asMap()
-                    .map(
-                      (index, value) => MapEntry(
-                        index,
-                        DataRow(
-                          cells: [
-                            DataCell(
-                              SizedBox(
-                                width: screenWidth / 12.5,
-                                child: Center(
-                                  child: Text(
-                                    (index + 1).toString(),
+                  ],
+                  rows: mUserController.listUsers
+                      .asMap()
+                      .map(
+                        (index, value) => MapEntry(
+                          index,
+                          DataRow(
+                            cells: [
+                              DataCell(
+                                SizedBox(
+                                  width: screenWidth / 12.5,
+                                  child: Center(
+                                    child: Text(
+                                      (index + 1).toString(),
+                                    ),
                                   ),
                                 ),
                               ),
-                            ),
-                            DataCell(
-                              SizedBox(
-                                width: screenWidth / 8,
-                                child: Center(
-                                  child: Text(
-                                    value.username,
-                                    textAlign: TextAlign.center,
+                              DataCell(
+                                SizedBox(
+                                  width: screenWidth / 8,
+                                  child: Center(
+                                    child: Text(
+                                      value.username,
+                                      textAlign: TextAlign.center,
+                                    ),
                                   ),
                                 ),
                               ),
-                            ),
-                            DataCell(
-                              SizedBox(
-                                width: screenWidth / 8,
-                                child: Center(
-                                  child: Text(
-                                    value.email,
-                                    textAlign: TextAlign.center,
+                              DataCell(
+                                SizedBox(
+                                  width: screenWidth / 8,
+                                  child: Center(
+                                    child: Text(
+                                      value.email,
+                                      textAlign: TextAlign.center,
+                                    ),
                                   ),
                                 ),
                               ),
-                            ),
-                            DataCell(
-                              SizedBox(
-                                width: screenWidth / 10.5,
-                                child: Center(
-                                  child: Text(
-                                    value.role,
-                                    textAlign: TextAlign.center,
+                              DataCell(
+                                SizedBox(
+                                  width: screenWidth / 10.5,
+                                  child: Center(
+                                    child: Text(
+                                      value.role,
+                                      textAlign: TextAlign.center,
+                                    ),
                                   ),
                                 ),
                               ),
-                            ),
-                            DataCell(
-                              SizedBox(
-                                width: screenWidth / 8,
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    InkWell(
-                                      onTap: () {
-                                        showDialog(
-                                          context: context,
-                                          builder: (context) =>
-                                              DialogEditFormUser(
-                                            user: value,
-                                          ),
-                                        );
-                                      },
-                                      borderRadius: const BorderRadius.all(
-                                        Radius.circular(12),
-                                      ),
-                                      child: Container(
-                                        width: 32,
-                                        height: 32,
-                                        decoration: const BoxDecoration(
-                                          color: Colors.black87,
-                                          borderRadius: BorderRadius.all(
-                                            Radius.circular(8),
-                                          ),
+                              DataCell(
+                                SizedBox(
+                                  width: screenWidth / 7.8,
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      InkWell(
+                                        onTap: () {
+                                          showDialog(
+                                            context: context,
+                                            builder: (context) =>
+                                                DialogEditFormUser(
+                                              user: value,
+                                            ),
+                                          );
+                                        },
+                                        borderRadius: const BorderRadius.all(
+                                          Radius.circular(12),
                                         ),
-                                        child: const Icon(
-                                          UniconsLine.edit,
-                                          color: Colors.white,
-                                          size: 20,
-                                        ),
-                                      ),
-                                    ),
-                                    const SizedBox(
-                                      width: 8,
-                                    ),
-                                    InkWell(
-                                      onTap: () {
-                                        print(value.idDocument);
-                                        showDialog(
-                                          context: context,
-                                          builder: (context) =>
-                                              DialogFormResetPassword(
-                                            user: value,
+                                        child: Container(
+                                          width: 32,
+                                          height: 32,
+                                          decoration: const BoxDecoration(
+                                            color: Colors.black87,
+                                            borderRadius: BorderRadius.all(
+                                              Radius.circular(8),
+                                            ),
                                           ),
-                                        );
-                                      },
-                                      borderRadius: const BorderRadius.all(
-                                        Radius.circular(12),
-                                      ),
-                                      child: Container(
-                                        width: 32,
-                                        height: 32,
-                                        decoration: const BoxDecoration(
-                                          color: ColorConstant.primaryColor,
-                                          borderRadius: BorderRadius.all(
-                                            Radius.circular(8),
+                                          child: const Icon(
+                                            UniconsLine.edit,
+                                            color: Colors.white,
+                                            size: 20,
                                           ),
                                         ),
-                                        child: const Icon(
-                                          UniconsLine.key_skeleton,
-                                          color: Colors.white,
-                                          size: 20,
+                                      ),
+                                      const SizedBox(
+                                        width: 8,
+                                      ),
+                                      InkWell(
+                                        onTap: () {
+                                          showDialog(
+                                            context: context,
+                                            builder: (context) =>
+                                                DialogFormResetPassword(
+                                              user: value,
+                                            ),
+                                          );
+                                        },
+                                        borderRadius: const BorderRadius.all(
+                                          Radius.circular(12),
                                         ),
-                                      ),
-                                    ),
-                                    const SizedBox(
-                                      width: 8,
-                                    ),
-                                    InkWell(
-                                      onTap: () {
-                                        Get.defaultDialog(
-                                          contentPadding:
-                                              const EdgeInsets.all(32),
-                                          title: 'Hapus Produk',
-                                          middleText:
-                                              'Apakah kamu yakin ingin menghapus produk ini ?',
-                                          textConfirm: 'Ya',
-                                          textCancel: 'Tidak',
-                                          buttonColor: Colors.black87,
-                                          confirmTextColor: Colors.white,
-                                          cancelTextColor: Colors.black87,
-                                          onConfirm: () {
-                                            mUserController.deleteUser(
-                                              value.idDocument!,
-                                            );
-                                          },
-                                          onCancel: () => Get.back(),
-                                        );
-                                      },
-                                      borderRadius: const BorderRadius.all(
-                                        Radius.circular(12),
-                                      ),
-                                      child: Container(
-                                        width: 32,
-                                        height: 32,
-                                        decoration: const BoxDecoration(
-                                          color: Colors.black87,
-                                          borderRadius: BorderRadius.all(
-                                            Radius.circular(8),
+                                        child: Container(
+                                          width: 32,
+                                          height: 32,
+                                          decoration: const BoxDecoration(
+                                            color: ColorConstant.primaryColor,
+                                            borderRadius: BorderRadius.all(
+                                              Radius.circular(8),
+                                            ),
+                                          ),
+                                          child: const Icon(
+                                            UniconsLine.key_skeleton,
+                                            color: Colors.white,
+                                            size: 20,
                                           ),
                                         ),
-                                        child: const Icon(
-                                          UniconsLine.trash_alt,
-                                          color: Colors.white,
-                                          size: 20,
-                                        ),
                                       ),
-                                    )
-                                  ],
+                                      const SizedBox(
+                                        width: 8,
+                                      ),
+                                      InkWell(
+                                        onTap: () {
+                                          Get.defaultDialog(
+                                            contentPadding:
+                                                const EdgeInsets.all(32),
+                                            title: 'Hapus Produk',
+                                            middleText:
+                                                'Apakah kamu yakin ingin menghapus produk ini ?',
+                                            textConfirm: 'Ya',
+                                            textCancel: 'Tidak',
+                                            buttonColor: Colors.black87,
+                                            confirmTextColor: Colors.white,
+                                            cancelTextColor: Colors.black87,
+                                            onConfirm: () {
+                                              mUserController.deleteUser(
+                                                value.idDocument!,
+                                              );
+                                            },
+                                            onCancel: () => Get.back(),
+                                          );
+                                        },
+                                        borderRadius: const BorderRadius.all(
+                                          Radius.circular(12),
+                                        ),
+                                        child: Container(
+                                          width: 32,
+                                          height: 32,
+                                          decoration: const BoxDecoration(
+                                            color: Colors.black87,
+                                            borderRadius: BorderRadius.all(
+                                              Radius.circular(8),
+                                            ),
+                                          ),
+                                          child: const Icon(
+                                            UniconsLine.trash_alt,
+                                            color: Colors.white,
+                                            size: 20,
+                                          ),
+                                        ),
+                                      )
+                                    ],
+                                  ),
                                 ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
-                      ),
-                    )
-                    .values
-                    .toList(),
+                      )
+                      .values
+                      .toList(),
+                ),
               ),
             ),
           );
