@@ -1,15 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:projectka_pos/app/modules/home/controllers/home_controller.dart';
+import 'package:projectka_pos/app/modules/home/controllers/manage_product_controller.dart';
 import 'package:projectka_pos/core/constant/color.constant.dart';
 import 'package:projectka_pos/core/utils/dialog.util.dart';
 import 'package:projectka_pos/core/utils/styles.dart';
 import 'package:projectka_pos/services/local/pdf_services.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:unicons/unicons.dart';
 
 class ManageProduct extends StatelessWidget {
-  const ManageProduct({Key? key}) : super(key: key);
+  final mProductController = Get.find<ManageProductController>();
+  ManageProduct({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -21,6 +23,7 @@ class ManageProduct extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
@@ -106,7 +109,7 @@ class ManageProduct extends StatelessWidget {
             const SizedBox(
               height: 16,
             ),
-            const DataTableProduct(),
+            DataTableProduct(),
           ],
         ),
       ),
@@ -115,13 +118,34 @@ class ManageProduct extends StatelessWidget {
 }
 
 class DialogFormProduct extends StatelessWidget {
-  final controller = Get.find<HomeController>();
+  final mProductController = Get.find<ManageProductController>();
   String titleForm;
+  bool action;
 
-  DialogFormProduct({Key? key, required this.titleForm}) : super(key: key);
+  String? codeProduct;
+  String? nameProduct;
+  int? price;
+  int? stock;
+
+  DialogFormProduct({
+    Key? key,
+    required this.titleForm,
+    required this.action,
+    this.codeProduct,
+    this.nameProduct,
+    this.price,
+    this.stock,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    mProductController.resetEditingCtl();
+    if (action) {
+      mProductController.nameProductTec.text = nameProduct!;
+      mProductController.priceTec.text = price.toString();
+      mProductController.codeProductTec.text = codeProduct!;
+      mProductController.stockProductTec.text = stock.toString();
+    }
     return Dialog(
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.all(
@@ -141,6 +165,7 @@ class DialogFormProduct extends StatelessWidget {
         ),
         child: SingleChildScrollView(
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -169,6 +194,8 @@ class DialogFormProduct extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8.0),
                 child: TextField(
+                  controller: mProductController.codeProductTec,
+                  enabled: action ? false : true,
                   style: const TextStyle(fontSize: 14),
                   cursorColor: ColorConstant.primaryColor,
                   decoration: GlobalStyles.formInputDecoration('Kode Produk'),
@@ -177,6 +204,7 @@ class DialogFormProduct extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8.0),
                 child: TextField(
+                  controller: mProductController.nameProductTec,
                   style: const TextStyle(fontSize: 14),
                   cursorColor: ColorConstant.primaryColor,
                   decoration: GlobalStyles.formInputDecoration('Nama Produk'),
@@ -185,6 +213,7 @@ class DialogFormProduct extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8.0),
                 child: TextField(
+                  controller: mProductController.priceTec,
                   style: const TextStyle(fontSize: 14),
                   cursorColor: ColorConstant.primaryColor,
                   inputFormatters: [FilteringTextInputFormatter.digitsOnly],
@@ -195,6 +224,7 @@ class DialogFormProduct extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8.0),
                 child: TextField(
+                  controller: mProductController.stockProductTec,
                   style: const TextStyle(fontSize: 14),
                   cursorColor: ColorConstant.primaryColor,
                   inputFormatters: [FilteringTextInputFormatter.digitsOnly],
@@ -202,13 +232,36 @@ class DialogFormProduct extends StatelessWidget {
                   decoration: GlobalStyles.formInputDecoration('Stok Produk'),
                 ),
               ),
+              Obx(
+                () => Text(
+                  mProductController.errFormMessage.value,
+                  textAlign: TextAlign.start,
+                  style: const TextStyle(color: Colors.redAccent),
+                ),
+              ),
               const SizedBox(
                 height: 16,
               ),
               ElevatedButton(
-                onPressed: () {},
+                onPressed: () async {
+                  if (!action) {
+                    // Check Code Product
+                    final codeProductIsAvailable =
+                        await mProductController.checkCodeProduct(
+                      mProductController.codeProductTec.text,
+                    );
+
+                    if (codeProductIsAvailable) {
+                      mProductController.errFormMessage.value =
+                          'Kode Produk Telah Tersedia';
+
+                      return;
+                    }
+                  }
+                  mProductController.setProduct();
+                },
                 style: ElevatedButton.styleFrom(
-                  primary: ColorConstant.primaryColor,
+                  backgroundColor: ColorConstant.primaryColor,
                   elevation: 0.5,
                   shape: const RoundedRectangleBorder(
                     borderRadius: BorderRadius.all(
@@ -231,12 +284,14 @@ class DialogFormProduct extends StatelessWidget {
 }
 
 class DataTableProduct extends StatelessWidget {
-  const DataTableProduct({
+  final mProductController = Get.find<ManageProductController>();
+  DataTableProduct({
     Key? key,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    double screenWidth = MediaQuery.of(context).size.width;
     return Container(
       decoration: BoxDecoration(
         borderRadius: const BorderRadius.all(
@@ -246,224 +301,358 @@ class DataTableProduct extends StatelessWidget {
           width: 1,
         ),
       ),
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: DataTable(
-          dataRowHeight: 80,
-          columns: const [
-            DataColumn(
-              label: Expanded(
-                child: Center(
-                  child: Text(
-                    'Nomor',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
+      child: GetBuilder(
+        init: mProductController,
+        builder: (_) {
+          if (mProductController.isLoading.value) {
+            return const ShimmerTableProductLoading();
+          }
+
+          if (mProductController.listProduct.isEmpty) {
+            return const Center(
+              child: Padding(
+                padding: EdgeInsets.all(16.0),
+                child: Text('Yahhh, Belum ada satupun produk nih :('),
               ),
-            ),
-            DataColumn(
-              label: Expanded(
-                child: Center(
-                  child: Text(
-                    'Kode Produk',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            DataColumn(
-              label: Expanded(
-                child: Center(
-                  child: Text(
-                    'Nama Produk',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            DataColumn(
-              label: Expanded(
-                child: Center(
-                  child: Text(
-                    'Harga Produk',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            DataColumn(
-              label: Expanded(
-                child: Center(
-                  child: Text(
-                    'Stok Produk',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            DataColumn(
-              label: Expanded(
-                child: Center(
-                  child: Text(
-                    'Aksi',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ],
-          rows: [
-            DataRow(
-              cells: [
-                const DataCell(
-                  SizedBox(
-                    width: 60,
-                    child: Center(
-                      child: Text(
-                        '1',
-                      ),
-                    ),
-                  ),
-                ),
-                const DataCell(
-                  SizedBox(
-                    width: 200,
-                    child: Center(
-                      child: Text(
-                        'TR-MR-2022-RR-NJASDNJASBD',
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                  ),
-                ),
-                const DataCell(
-                  SizedBox(
-                    width: 200,
-                    child: Center(
-                      child: Text(
-                        'Bunga bisa dimakan',
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                  ),
-                ),
-                const DataCell(
-                  SizedBox(
-                    width: 200,
-                    child: Center(
-                      child: Text(
-                        'Rp. 300.000',
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                  ),
-                ),
-                const DataCell(
-                  SizedBox(
-                    width: 180,
-                    child: Center(
-                      child: Text(
-                        '5 Unit',
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                  ),
-                ),
-                DataCell(
-                  SizedBox(
-                    width: 220,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        InkWell(
-                          onTap: () {
-                            showDialog(
-                              context: context,
-                              builder: (context) => DialogFormProduct(
-                                titleForm: 'Ubah Produk',
-                              ),
-                            );
-                          },
-                          borderRadius: const BorderRadius.all(
-                            Radius.circular(12),
-                          ),
-                          child: Container(
-                            width: 32,
-                            height: 32,
-                            decoration: const BoxDecoration(
-                              color: Colors.black87,
-                              borderRadius: BorderRadius.all(
-                                Radius.circular(8),
-                              ),
-                            ),
-                            child: const Icon(
-                              UniconsLine.edit,
-                              color: Colors.white,
-                              size: 20,
+            );
+          }
+
+          return Scrollbar(
+            controller: mProductController.scrollHorizontalTable,
+            child: SingleChildScrollView(
+              controller: mProductController.scrollHorizontalTable,
+              scrollDirection: Axis.horizontal,
+              child: Theme(
+                data: Theme.of(context)
+                    .copyWith(dividerColor: ColorConstant.primaryColor),
+                child: DataTable(
+                  dataRowHeight: 80,
+                  columns: const [
+                    DataColumn(
+                      label: Expanded(
+                        child: Center(
+                          child: Text(
+                            'Nomor',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
                             ),
                           ),
                         ),
-                        const SizedBox(
-                          width: 8,
-                        ),
-                        InkWell(
-                          onTap: () {
-                            Get.defaultDialog(
-                              contentPadding: const EdgeInsets.all(32),
-                              title: 'Hapus Produk',
-                              middleText:
-                                  'Apakah kamu yakin ingin menghapus produk ini ?',
-                              textConfirm: 'Ya',
-                              textCancel: 'Tidak',
-                              buttonColor: Colors.black87,
-                              confirmTextColor: Colors.white,
-                              cancelTextColor: Colors.black87,
-                              onConfirm: () {
-                                Get.back();
-                              },
-                              onCancel: () => Get.back(),
-                            );
-                          },
-                          borderRadius: const BorderRadius.all(
-                            Radius.circular(12),
-                          ),
-                          child: Container(
-                            width: 32,
-                            height: 32,
-                            decoration: const BoxDecoration(
-                              color: Colors.black87,
-                              borderRadius: BorderRadius.all(
-                                Radius.circular(8),
-                              ),
-                            ),
-                            child: const Icon(
-                              UniconsLine.trash_alt,
-                              color: Colors.white,
-                              size: 20,
-                            ),
-                          ),
-                        )
-                      ],
+                      ),
                     ),
-                  ),
+                    DataColumn(
+                      label: Expanded(
+                        child: Center(
+                          child: Text(
+                            'Kode Produk',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    DataColumn(
+                      label: Expanded(
+                        child: Center(
+                          child: Text(
+                            'Nama Produk',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    DataColumn(
+                      label: Expanded(
+                        child: Center(
+                          child: Text(
+                            'Harga Produk',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    DataColumn(
+                      label: Expanded(
+                        child: Center(
+                          child: Text(
+                            'Stok Produk',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    DataColumn(
+                      label: Expanded(
+                        child: Center(
+                          child: Text(
+                            'Terjual',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    DataColumn(
+                      label: Expanded(
+                        child: Center(
+                          child: Text(
+                            'Aksi',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                  rows: mProductController.listProduct
+                      .asMap()
+                      .map(
+                        (index, value) => MapEntry(
+                          index,
+                          DataRow(
+                            cells: [
+                              DataCell(
+                                SizedBox(
+                                  width: screenWidth / 25,
+                                  child: Center(
+                                    child: Text(
+                                      (index + 1).toString(),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              DataCell(
+                                SizedBox(
+                                  width: screenWidth / 11.3,
+                                  child: Center(
+                                    child: Text(
+                                      value.idDocument!,
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              DataCell(
+                                SizedBox(
+                                  width: screenWidth / 10,
+                                  child: Center(
+                                    child: Text(
+                                      value.productName,
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              DataCell(
+                                SizedBox(
+                                  width: screenWidth / 15,
+                                  child: Center(
+                                    child: Text(
+                                      value.price.toString(),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              DataCell(
+                                SizedBox(
+                                  width: screenWidth / 15,
+                                  child: Center(
+                                    child: Text(
+                                      '${value.stock} Unit',
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              DataCell(
+                                SizedBox(
+                                  width: screenWidth / 15,
+                                  child: Center(
+                                    child: Text(
+                                      '${value.sold} Unit',
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              DataCell(
+                                SizedBox(
+                                  width: screenWidth / 15,
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      InkWell(
+                                        onTap: () {
+                                          showDialog(
+                                            context: context,
+                                            builder: (context) {
+                                              return DialogFormProduct(
+                                                titleForm: 'Ubah Produk',
+                                                action: true,
+                                                codeProduct: value.idDocument,
+                                                nameProduct: value.productName,
+                                                price: value.price,
+                                                stock: value.stock,
+                                              );
+                                            },
+                                          );
+                                        },
+                                        borderRadius: const BorderRadius.all(
+                                          Radius.circular(12),
+                                        ),
+                                        child: Container(
+                                          width: 32,
+                                          height: 32,
+                                          decoration: const BoxDecoration(
+                                            color: Colors.black87,
+                                            borderRadius: BorderRadius.all(
+                                              Radius.circular(8),
+                                            ),
+                                          ),
+                                          child: const Icon(
+                                            UniconsLine.edit,
+                                            color: Colors.white,
+                                            size: 20,
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(
+                                        width: 8,
+                                      ),
+                                      InkWell(
+                                        onTap: () {
+                                          Get.defaultDialog(
+                                            contentPadding:
+                                                const EdgeInsets.all(32),
+                                            title: 'Hapus Produk',
+                                            middleText:
+                                                'Apakah kamu yakin ingin menghapus produk ini ?',
+                                            textConfirm: 'Ya',
+                                            textCancel: 'Tidak',
+                                            buttonColor: Colors.black87,
+                                            confirmTextColor: Colors.white,
+                                            cancelTextColor: Colors.black87,
+                                            onConfirm: () {
+                                              mProductController
+                                                  .deleteDataProduct(
+                                                value.idDocument!,
+                                              );
+                                            },
+                                            onCancel: () => Get.back(),
+                                          );
+                                        },
+                                        borderRadius: const BorderRadius.all(
+                                          Radius.circular(12),
+                                        ),
+                                        child: Container(
+                                          width: 32,
+                                          height: 32,
+                                          decoration: const BoxDecoration(
+                                            color: Colors.black87,
+                                            borderRadius: BorderRadius.all(
+                                              Radius.circular(8),
+                                            ),
+                                          ),
+                                          child: const Icon(
+                                            UniconsLine.trash_alt,
+                                            color: Colors.white,
+                                            size: 20,
+                                          ),
+                                        ),
+                                      )
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      )
+                      .values
+                      .toList(),
                 ),
-              ],
+              ),
             ),
-          ],
-        ),
+          );
+        },
       ),
+    );
+  }
+}
+
+class ShimmerTableProductLoading extends StatelessWidget {
+  const ShimmerTableProductLoading({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return DataTable(
+      columns: [
+        DataColumn(
+          label: Expanded(
+            child: Shimmer.fromColors(
+              baseColor: Colors.grey.shade600,
+              highlightColor: Colors.grey.shade200,
+              child: const Text('Kode Produk'),
+            ),
+          ),
+        ),
+        DataColumn(
+          label: Expanded(
+            child: Shimmer.fromColors(
+              baseColor: Colors.grey.shade600,
+              highlightColor: Colors.grey.shade200,
+              child: const Text('Produk'),
+            ),
+          ),
+        ),
+        DataColumn(
+          label: Expanded(
+            child: Shimmer.fromColors(
+              baseColor: Colors.grey.shade600,
+              highlightColor: Colors.grey.shade200,
+              child: const Text('Harga'),
+            ),
+          ),
+        ),
+        DataColumn(
+          label: Expanded(
+            child: Shimmer.fromColors(
+              baseColor: Colors.grey.shade600,
+              highlightColor: Colors.grey.shade200,
+              child: const Text('Stok Produk'),
+            ),
+          ),
+        ),
+        DataColumn(
+          label: Expanded(
+            child: Shimmer.fromColors(
+              baseColor: Colors.grey.shade600,
+              highlightColor: Colors.grey.shade200,
+              child: const Text('Produk Terjual'),
+            ),
+          ),
+        ),
+        DataColumn(
+          label: Expanded(
+            child: Shimmer.fromColors(
+              baseColor: Colors.grey.shade600,
+              highlightColor: Colors.grey.shade200,
+              child: const Text('Aksi'),
+            ),
+          ),
+        )
+      ],
+      rows: const [],
     );
   }
 }
