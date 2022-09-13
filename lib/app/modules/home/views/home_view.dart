@@ -48,7 +48,7 @@ class HomeView extends GetView<HomeController> {
                           content = ManageProduct();
                           break;
                         case 2:
-                          content = const ManageTransaction();
+                          content = ManageTransaction();
                           break;
                         case 3:
                           content = ManageUser();

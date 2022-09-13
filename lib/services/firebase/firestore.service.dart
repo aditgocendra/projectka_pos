@@ -1,5 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:projectka_pos/app/models/detail_transaction.dart';
 import 'package:projectka_pos/app/models/product.dart';
+import 'package:projectka_pos/app/models/transaction.dart';
 import 'package:projectka_pos/app/models/users.dart';
 
 abstract class FirestoreService {
@@ -19,4 +21,27 @@ abstract class FirestoreService {
           fromFirestore: ProductModel.fromFirestore,
           toFirestore: (ProductModel productModel, options) =>
               productModel.toFirestore());
+
+  static final refTransaction = FirebaseFirestore.instance
+      .collection('transactions')
+      .withConverter<TransactionModel>(
+          fromFirestore: (snapshot, _) =>
+              TransactionModel.fromJson(snapshot.data()!),
+          toFirestore: (transaction, _) => transaction.toJson());
+
+  static CollectionReference<DetailTransactionModel>
+      refSubCollectionDetailTransaction({
+    required String idDoc,
+    required String collection,
+    required String subCollectionPath,
+  }) {
+    return FirebaseFirestore.instance
+        .collection(collection)
+        .doc(idDoc)
+        .collection(subCollectionPath)
+        .withConverter<DetailTransactionModel>(
+            fromFirestore: (snapshot, _) =>
+                DetailTransactionModel.fromJson(snapshot.data()!),
+            toFirestore: (dTrans, _) => dTrans.toJson());
+  }
 }

@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:projectka_pos/app/modules/home/controllers/home_controller.dart';
+import 'package:projectka_pos/app/models/product.dart';
+import 'package:projectka_pos/app/modules/home/controllers/manage_transaction_controller.dart';
 import 'package:projectka_pos/core/constant/color.constant.dart';
+import 'package:projectka_pos/core/utils/string.util.dart';
 import 'package:projectka_pos/core/utils/styles.dart';
 import 'package:projectka_pos/services/local/pdf_services.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:unicons/unicons.dart';
 
 class ManageTransaction extends StatelessWidget {
-  const ManageTransaction({Key? key}) : super(key: key);
+  final mTransController = Get.find<ManageTransactionController>();
+  ManageTransaction({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -19,6 +23,7 @@ class ManageTransaction extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
@@ -107,7 +112,7 @@ class ManageTransaction extends StatelessWidget {
             const SizedBox(
               height: 16,
             ),
-            const DataTableTransaction(),
+            DataTableTransaction(),
           ],
         ),
       ),
@@ -116,7 +121,8 @@ class ManageTransaction extends StatelessWidget {
 }
 
 class DialogDetailTransaction extends StatelessWidget {
-  const DialogDetailTransaction({Key? key}) : super(key: key);
+  final mTransactionCtl = Get.find<ManageTransactionController>();
+  DialogDetailTransaction({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -168,17 +174,19 @@ class DialogDetailTransaction extends StatelessWidget {
                     Radius.circular(16),
                   ),
                 ),
-                child: const ListTile(
+                child: ListTile(
                   title: Text(
-                    'Kode Transaksi : TR-KL-2022-08-12-B023SJHFD',
-                    style: TextStyle(
+                    mTransactionCtl.codeTrans.value,
+                    style: const TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                   trailing: Text(
-                    'Rp. 540.000',
-                    style: TextStyle(
+                    StringUtil.rupiahFormat(
+                      mTransactionCtl.totalPayTransDetail.value,
+                    ),
+                    style: const TextStyle(
                       color: ColorConstant.primaryColor,
                       fontWeight: FontWeight.bold,
                     ),
@@ -195,49 +203,36 @@ class DialogDetailTransaction extends StatelessWidget {
                     Radius.circular(16),
                   ),
                 ),
-                child: Column(
-                  children: const [
-                    ListTile(
-                      title: Text(
-                        'Bunga Flamel',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      subtitle: Text(
-                        'Rp. 350.000',
-                        style: TextStyle(fontSize: 12),
-                      ),
-                      trailing: Text(
-                        '3 Unit',
-                        style: TextStyle(
-                          color: ColorConstant.primaryColor,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                    ListTile(
-                      title: Text(
-                        '3 Seconds Bundle Transctip',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      subtitle: Text(
-                        'Rp. 320.000',
-                        style: TextStyle(fontSize: 12),
-                      ),
-                      trailing: Text(
-                        '6 Unit',
-                        style: TextStyle(
-                          color: ColorConstant.primaryColor,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ],
+                child: GetBuilder(
+                  init: mTransactionCtl,
+                  builder: (_) {
+                    return Column(
+                      children: mTransactionCtl.listDetailTransDialog
+                          .map(
+                            (val) => ListTile(
+                              title: Text(
+                                val.productName,
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              subtitle: Text(
+                                StringUtil.rupiahFormat(val.price),
+                                style: const TextStyle(fontSize: 12),
+                              ),
+                              trailing: Text(
+                                '${val.totalBuy} Unit',
+                                style: const TextStyle(
+                                  color: ColorConstant.primaryColor,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          )
+                          .toList(),
+                    );
+                  },
                 ),
               )
             ],
@@ -249,7 +244,7 @@ class DialogDetailTransaction extends StatelessWidget {
 }
 
 class DialogFormTransaction extends StatelessWidget {
-  final controller = Get.find<HomeController>();
+  final mTransController = Get.find<ManageTransactionController>();
 
   DialogFormTransaction({
     Key? key,
@@ -257,6 +252,7 @@ class DialogFormTransaction extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    mTransController.resetFormProduct();
     return Dialog(
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.all(
@@ -276,6 +272,7 @@ class DialogFormTransaction extends StatelessWidget {
         ),
         child: SingleChildScrollView(
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -304,6 +301,7 @@ class DialogFormTransaction extends StatelessWidget {
                     child: Padding(
                       padding: const EdgeInsets.symmetric(vertical: 8.0),
                       child: TextField(
+                        controller: mTransController.codeProductTec,
                         style: const TextStyle(fontSize: 14),
                         cursorColor: ColorConstant.primaryColor,
                         decoration:
@@ -316,13 +314,7 @@ class DialogFormTransaction extends StatelessWidget {
                   ),
                   IconButton(
                     onPressed: () {
-                      controller.countProductTransaction.value++;
-                      final productSelect = {
-                        'product': 'Bunga Flamel',
-                        'price': 50000,
-                        'total': 1.obs,
-                      };
-                      controller.listProductSelect.add(productSelect);
+                      mTransController.addProductForm();
                     },
                     icon: const Icon(
                       UniconsLine.plus_circle,
@@ -338,12 +330,13 @@ class DialogFormTransaction extends StatelessWidget {
                   border: Border.all(color: Colors.grey.shade400),
                   borderRadius: BorderRadius.circular(16),
                 ),
-                child: Obx(
-                  () {
+                child: GetBuilder(
+                  init: mTransController,
+                  builder: (_) {
                     return ListView.builder(
                       shrinkWrap: true,
                       primary: false,
-                      itemCount: controller.countProductTransaction.value,
+                      itemCount: mTransController.listProductForm.length,
                       itemBuilder: (context, index) => ProductItem(
                         index: index,
                       ),
@@ -364,31 +357,46 @@ class DialogFormTransaction extends StatelessWidget {
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: const [
-                    Text(
+                  children: [
+                    const Text(
                       'Total Bayar',
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    Text(
-                      'Rp. 240.000',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: ColorConstant.primaryColor,
+                    Obx(
+                      () => Text(
+                        StringUtil.rupiahFormat(
+                          mTransController.totalPay.value,
+                        ),
+                        style: const TextStyle(
+                          fontSize: 16,
+                          color: ColorConstant.primaryColor,
+                        ),
                       ),
                     )
                   ],
                 ),
               ),
               const SizedBox(
-                height: 16,
+                height: 8,
+              ),
+              Obx(
+                () => Text(
+                  mTransController.errorMessageForm.value,
+                  style: const TextStyle(color: Colors.redAccent),
+                ),
+              ),
+              const SizedBox(
+                height: 8,
               ),
               ElevatedButton(
-                onPressed: () {},
+                onPressed: () {
+                  mTransController.createTransaction();
+                },
                 style: ElevatedButton.styleFrom(
-                  primary: ColorConstant.primaryColor,
+                  backgroundColor: ColorConstant.primaryColor,
                   elevation: 0.5,
                   shape: const RoundedRectangleBorder(
                     borderRadius: BorderRadius.all(
@@ -411,50 +419,46 @@ class DialogFormTransaction extends StatelessWidget {
 }
 
 class ProductItem extends StatelessWidget {
-  final controller = Get.find<HomeController>();
+  final mTransController = Get.find<ManageTransactionController>();
   int index;
   ProductItem({Key? key, required this.index}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    ProductModel product = mTransController.listProductForm[index]['product'];
     return ListTile(
       contentPadding: EdgeInsets.zero,
-      title: const Text(
-        'Bunga Flamel',
-        style: TextStyle(
+      title: Text(
+        product.productName,
+        style: const TextStyle(
           fontSize: 14,
           fontWeight: FontWeight.bold,
         ),
       ),
-      subtitle: const Text(
-        'Rp.30.000',
-        style: TextStyle(fontSize: 12),
+      subtitle: Text(
+        product.price.toString(),
+        style: const TextStyle(fontSize: 12),
       ),
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           IconButton(
             onPressed: () {
-              if (controller.listProductSelect[index]['total'].value > 1) {
-                controller.listProductSelect[index]['total'].value--;
-              } else {
-                controller.countProductTransaction.value--;
-                controller.listProductSelect.removeAt(index);
-              }
+              mTransController.removeValueProductForm(index);
             },
             icon: const Icon(
               UniconsLine.minus_circle,
               color: ColorConstant.primaryColor,
             ),
           ),
-          Obx(
-            () => Text(
-              controller.listProductSelect[index]['total'].value.toString(),
-            ),
+          Text(
+            mTransController.listProductForm[index]['totalBuy'].toString(),
           ),
           IconButton(
             onPressed: () {
-              controller.listProductSelect[index]['total'].value++;
+              mTransController.listProductForm[index]['totalBuy'] += 1;
+              mTransController.updateTotalPay();
+              mTransController.update();
             },
             icon: const Icon(
               UniconsLine.plus_circle,
@@ -468,12 +472,14 @@ class ProductItem extends StatelessWidget {
 }
 
 class DataTableTransaction extends StatelessWidget {
-  const DataTableTransaction({
+  final mTransController = Get.find<ManageTransactionController>();
+  DataTableTransaction({
     Key? key,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    double screenWidth = MediaQuery.of(context).size.width;
     return Container(
       decoration: BoxDecoration(
         borderRadius: const BorderRadius.all(
@@ -483,177 +489,264 @@ class DataTableTransaction extends StatelessWidget {
           width: 1,
         ),
       ),
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: DataTable(
-          dataRowHeight: 80,
-          columns: const [
-            DataColumn(
-              label: Expanded(
-                child: Center(
-                  child: Text(
-                    'Nomor',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
+      child: GetBuilder(
+        init: mTransController,
+        builder: (_) {
+          if (mTransController.isLoadingTableData.value) {
+            return const ShimmerTransactionTable();
+          }
+
+          if (mTransController.listDataTable.isEmpty) {
+            return const Center(
+              child: Padding(
+                padding: EdgeInsets.all(16.0),
+                child: Text('Yahhh, Belum ada satupun transaksi nih :('),
               ),
-            ),
-            DataColumn(
-              label: Expanded(
-                child: Center(
-                  child: Text(
-                    'Kode Transaksi',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            DataColumn(
-              label: Expanded(
-                child: Center(
-                  child: Text(
-                    'Total Pembayaran',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            DataColumn(
-              label: Expanded(
-                child: Center(
-                  child: Text(
-                    'Aksi',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ],
-          rows: [
-            DataRow(
-              cells: [
-                const DataCell(
-                  SizedBox(
-                    width: 120,
-                    child: Center(
-                      child: Text(
-                        '1',
-                      ),
-                    ),
-                  ),
-                ),
-                const DataCell(
-                  SizedBox(
-                    width: 320,
-                    child: Center(
-                      child: Text(
-                        'TR-MR-2022-RR-NJASDNJASBD',
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                  ),
-                ),
-                const DataCell(
-                  SizedBox(
-                    width: 320,
-                    child: Center(
-                      child: Text(
-                        'Rp. 300.000',
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                  ),
-                ),
-                DataCell(
-                  SizedBox(
-                    width: 350,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        InkWell(
-                          onTap: () {
-                            showDialog(
-                              context: context,
-                              builder: (context) =>
-                                  const DialogDetailTransaction(),
-                            );
-                          },
-                          borderRadius: const BorderRadius.all(
-                            Radius.circular(12),
-                          ),
-                          child: Container(
-                            width: 32,
-                            height: 32,
-                            decoration: const BoxDecoration(
-                              color: Colors.black87,
-                              borderRadius: BorderRadius.all(
-                                Radius.circular(8),
+            );
+          }
+
+          return Scrollbar(
+            controller: mTransController.scrollHorizontalCtl,
+            child: SingleChildScrollView(
+                controller: mTransController.scrollHorizontalCtl,
+                scrollDirection: Axis.horizontal,
+                child: Theme(
+                  data: Theme.of(context)
+                      .copyWith(dividerColor: ColorConstant.primaryColor),
+                  child: DataTable(
+                    dataRowHeight: 80,
+                    columns: const [
+                      DataColumn(
+                        label: Expanded(
+                          child: Center(
+                            child: Text(
+                              'Nomor',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
                               ),
-                            ),
-                            child: const Icon(
-                              UniconsLine.eye,
-                              color: Colors.white,
-                              size: 20,
                             ),
                           ),
                         ),
-                        const SizedBox(
-                          width: 8,
-                        ),
-                        InkWell(
-                          onTap: () {
-                            Get.defaultDialog(
-                              contentPadding: const EdgeInsets.all(32),
-                              title: 'Hapus Produk',
-                              middleText:
-                                  'Apakah kamu yakin ingin menghapus produk ini ?',
-                              textConfirm: 'Ya',
-                              textCancel: 'Tidak',
-                              buttonColor: Colors.black87,
-                              confirmTextColor: Colors.white,
-                              cancelTextColor: Colors.black87,
-                              onConfirm: () {
-                                Get.back();
-                              },
-                              onCancel: () => Get.back(),
-                            );
-                          },
-                          borderRadius: const BorderRadius.all(
-                            Radius.circular(12),
-                          ),
-                          child: Container(
-                            width: 32,
-                            height: 32,
-                            decoration: const BoxDecoration(
-                              color: Colors.black87,
-                              borderRadius: BorderRadius.all(
-                                Radius.circular(8),
+                      ),
+                      DataColumn(
+                        label: Expanded(
+                          child: Center(
+                            child: Text(
+                              'Kode Transaksi',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
-                            child: const Icon(
-                              UniconsLine.trash_alt,
-                              color: Colors.white,
-                              size: 20,
+                          ),
+                        ),
+                      ),
+                      DataColumn(
+                        label: Expanded(
+                          child: Center(
+                            child: Text(
+                              'Total Pembayaran',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      DataColumn(
+                        label: Expanded(
+                          child: Center(
+                            child: Text(
+                              'Aksi',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                    rows: mTransController.listDataTable
+                        .asMap()
+                        .map(
+                          (index, value) => MapEntry(
+                            index,
+                            DataRow(
+                              cells: [
+                                DataCell(
+                                  SizedBox(
+                                    width: screenWidth / 15,
+                                    child: Center(
+                                      child: Text(
+                                        (index + 1).toString(),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                DataCell(
+                                  SizedBox(
+                                    width: screenWidth / 6,
+                                    child: Center(
+                                      child: Text(
+                                        value.idDocument!,
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                DataCell(
+                                  SizedBox(
+                                    width: screenWidth / 6,
+                                    child: Center(
+                                      child: Text(
+                                        StringUtil.rupiahFormat(value.totalPay),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                DataCell(
+                                  SizedBox(
+                                    width: screenWidth / 5.4,
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        InkWell(
+                                          onTap: () {
+                                            mTransController
+                                                .setDialogDetailTransaction(
+                                                    value);
+                                            showDialog(
+                                              context: context,
+                                              builder: (context) =>
+                                                  DialogDetailTransaction(),
+                                            );
+                                          },
+                                          borderRadius: const BorderRadius.all(
+                                            Radius.circular(12),
+                                          ),
+                                          child: Container(
+                                            width: 32,
+                                            height: 32,
+                                            decoration: const BoxDecoration(
+                                              color: Colors.black87,
+                                              borderRadius: BorderRadius.all(
+                                                Radius.circular(8),
+                                              ),
+                                            ),
+                                            child: const Icon(
+                                              UniconsLine.eye,
+                                              color: Colors.white,
+                                              size: 20,
+                                            ),
+                                          ),
+                                        ),
+                                        const SizedBox(
+                                          width: 8,
+                                        ),
+                                        InkWell(
+                                          onTap: () {
+                                            Get.defaultDialog(
+                                              contentPadding:
+                                                  const EdgeInsets.all(32),
+                                              title: 'Hapus Produk',
+                                              middleText:
+                                                  'Apakah kamu yakin ingin menghapus produk ini ?',
+                                              textConfirm: 'Ya',
+                                              textCancel: 'Tidak',
+                                              buttonColor: Colors.black87,
+                                              confirmTextColor: Colors.white,
+                                              cancelTextColor: Colors.black87,
+                                              onConfirm: () {
+                                                mTransController
+                                                    .deleteTransaction(
+                                                  value.idDocument!,
+                                                );
+                                                Get.back();
+                                              },
+                                              onCancel: () => Get.back(),
+                                            );
+                                          },
+                                          borderRadius: const BorderRadius.all(
+                                            Radius.circular(12),
+                                          ),
+                                          child: Container(
+                                            width: 32,
+                                            height: 32,
+                                            decoration: const BoxDecoration(
+                                              color: Colors.black87,
+                                              borderRadius: BorderRadius.all(
+                                                Radius.circular(8),
+                                              ),
+                                            ),
+                                            child: const Icon(
+                                              UniconsLine.trash_alt,
+                                              color: Colors.white,
+                                              size: 20,
+                                            ),
+                                          ),
+                                        )
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         )
-                      ],
-                    ),
+                        .values
+                        .toList(),
                   ),
-                ),
-              ],
-            ),
-          ],
-        ),
+                )),
+          );
+        },
       ),
     );
+  }
+}
+
+class ShimmerTransactionTable extends StatelessWidget {
+  const ShimmerTransactionTable({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return DataTable(columns: [
+      DataColumn(
+        label: Expanded(
+          child: Shimmer.fromColors(
+            baseColor: Colors.grey.shade600,
+            highlightColor: Colors.grey.shade200,
+            child: const Text('Nomor'),
+          ),
+        ),
+      ),
+      DataColumn(
+        label: Expanded(
+          child: Shimmer.fromColors(
+            baseColor: Colors.grey.shade600,
+            highlightColor: Colors.grey.shade200,
+            child: const Text('Kode Transaksi'),
+          ),
+        ),
+      ),
+      DataColumn(
+        label: Expanded(
+          child: Shimmer.fromColors(
+            baseColor: Colors.grey.shade600,
+            highlightColor: Colors.grey.shade200,
+            child: const Text('Total Pembayaran'),
+          ),
+        ),
+      ),
+      DataColumn(
+        label: Expanded(
+          child: Shimmer.fromColors(
+            baseColor: Colors.grey.shade600,
+            highlightColor: Colors.grey.shade200,
+            child: const Text('Aksi'),
+          ),
+        ),
+      )
+    ], rows: const []);
   }
 }
