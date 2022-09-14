@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:projectka_pos/app/modules/home/controllers/home_controller.dart';
-import 'package:projectka_pos/app/routes/app_pages.dart';
 import 'package:projectka_pos/core/constant/color.constant.dart';
 import 'package:projectka_pos/core/constant/sidebar.constant.dart';
 import 'package:unicons/unicons.dart';
@@ -19,6 +18,7 @@ class Sidebar extends StatelessWidget {
     } else {
       controller.isSidebarExpanded.value = false;
     }
+
     return Obx(
       () => ConstrainedBox(
         constraints: BoxConstraints(
@@ -117,7 +117,7 @@ class WidgetMenu extends StatelessWidget {
   String title;
   IconData icon;
   int index;
-  final controller = Get.find<HomeController>();
+  final homeController = Get.find<HomeController>();
 
   WidgetMenu({
     Key? key,
@@ -128,69 +128,81 @@ class WidgetMenu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Obx(
-      () => Container(
-        margin: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: index == controller.indexSidebarSelected.value
-              ? Colors.white60
-              : Colors.transparent,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Obx(
-          () {
-            Widget widget;
+    if (homeController.userRole.value == 'Kasir' && index == 1) {
+      return Container();
+    }
 
-            if (controller.isSidebarExpanded.value) {
-              widget = ListTile(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                onTap: () {
-                  controller.indexSidebarSelected.value = index;
-                  controller.setDataTable();
-                },
-                leading: Icon(
-                  icon,
-                  size: 20,
-                ),
-                title: Text(
-                  title,
-                  style: const TextStyle(fontSize: 12),
-                ),
-              );
-            } else {
-              widget = InkWell(
-                onTap: () {
-                  controller.indexSidebarSelected.value = index;
-                  controller.setDataTable();
-                },
-                borderRadius: BorderRadius.circular(12),
-                child: Container(
-                  margin: const EdgeInsets.symmetric(vertical: 8),
-                  padding: const EdgeInsets.all(4),
-                  child: Column(
-                    children: [
-                      Icon(
-                        icon,
-                        size: 18,
-                      ),
-                      const SizedBox(
-                        height: 6,
-                      ),
-                      Text(
-                        title,
-                        style: const TextStyle(fontSize: 8.5),
-                      ),
-                    ],
+    if (homeController.userRole.value == 'Admin' && index == 2) {
+      return Container();
+    }
+    if (homeController.userRole.value == 'Kasir' && index == 3) {
+      return Container();
+    }
+    return Obx(
+      () {
+        return Container(
+          margin: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: index == homeController.indexSidebarSelected.value
+                ? Colors.white60
+                : Colors.transparent,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Obx(
+            () {
+              Widget widget;
+
+              if (homeController.isSidebarExpanded.value) {
+                widget = ListTile(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                ),
-              );
-            }
-            return widget;
-          },
-        ),
-      ),
+                  onTap: () {
+                    homeController.indexSidebarSelected.value = index;
+                    homeController.setDataTable();
+                  },
+                  leading: Icon(
+                    icon,
+                    size: 20,
+                  ),
+                  title: Text(
+                    title,
+                    style: const TextStyle(fontSize: 12),
+                  ),
+                );
+              } else {
+                widget = InkWell(
+                  onTap: () {
+                    homeController.indexSidebarSelected.value = index;
+                    homeController.setDataTable();
+                  },
+                  borderRadius: BorderRadius.circular(12),
+                  child: Container(
+                    margin: const EdgeInsets.symmetric(vertical: 8),
+                    padding: const EdgeInsets.all(4),
+                    child: Column(
+                      children: [
+                        Icon(
+                          icon,
+                          size: 18,
+                        ),
+                        const SizedBox(
+                          height: 6,
+                        ),
+                        Text(
+                          title,
+                          style: const TextStyle(fontSize: 8.5),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }
+              return widget;
+            },
+          ),
+        );
+      },
     );
   }
 }
