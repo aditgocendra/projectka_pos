@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:projectka_pos/app/modules/home/controllers/manage_product_controller.dart';
+import 'package:projectka_pos/app/modules/home/controllers/manage_transaction_controller.dart';
 import 'package:projectka_pos/app/routes/app_pages.dart';
 import 'package:projectka_pos/core/constant/color.constant.dart';
 import 'package:projectka_pos/core/constant/rightbar.constant.dart';
 import 'package:projectka_pos/core/utils/dialog.util.dart';
-import 'package:projectka_pos/services/local/pdf_services.dart';
 
 class Rightbar extends StatelessWidget {
-  const Rightbar({Key? key}) : super(key: key);
+  final mProductController = Get.find<ManageProductController>();
+  final mTransController = Get.find<ManageTransactionController>();
+  Rightbar({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -63,7 +66,7 @@ class Rightbar extends StatelessWidget {
                           );
                         },
                         style: ElevatedButton.styleFrom(
-                          primary: Colors.black87,
+                          backgroundColor: Colors.black87,
                           elevation: 0.5,
                           shape: const RoundedRectangleBorder(
                             borderRadius: BorderRadius.all(
@@ -128,12 +131,12 @@ class Rightbar extends StatelessWidget {
                                       context,
                                     );
                                     break;
-                                  // case 2:
-                                  //   PdfServices.buildPdf(true);
-                                  //   break;
-                                  // case 3:
-                                  //   PdfServices.buildPdf(false);
-                                  //   break;
+                                  case 2:
+                                    mProductController.generateProductDataPdf();
+                                    break;
+                                  case 3:
+                                    DialogUtil.showDialogPdfReport(context);
+                                    break;
                                 }
                               },
                               shape: RoundedRectangleBorder(

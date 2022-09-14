@@ -79,7 +79,7 @@ class HomeView extends GetView<HomeController> {
             ),
           ),
           if (screenSize > 652)
-            const Expanded(
+            Expanded(
               child: Rightbar(),
             ),
         ],
