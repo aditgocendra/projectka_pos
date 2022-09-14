@@ -20,164 +20,202 @@ class Rightbar extends StatelessWidget {
         return ListView(
           controller: ScrollController(),
           children: [
-            Container(
-              margin: const EdgeInsets.only(bottom: 24, right: 24, top: 24),
-              decoration: BoxDecoration(
-                color: Colors.white60,
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  children: [
-                    Image.asset(
-                      'assets/images/avatar/ava_female.png',
-                      width: 64,
-                    ),
-                    const SizedBox(
-                      height: 8,
-                    ),
-                    if (constraints.maxWidth > 128)
-                      const Text(
-                        'Tria Hutagalung',
-                        style: TextStyle(fontSize: 12),
-                        textAlign: TextAlign.center,
-                      ),
-                    const SizedBox(
-                      height: 12,
-                    ),
-                    if (constraints.maxWidth > 128)
-                      ElevatedButton(
-                        onPressed: () {
-                          Get.defaultDialog(
-                            contentPadding: const EdgeInsets.all(16),
-                            title: 'Keluar Aplikasi',
-                            middleText:
-                                'Apakah kamu yakin ingin keluar aplikasi ?',
-                            textConfirm: 'Ya',
-                            textCancel: 'Tidak',
-                            buttonColor: ColorConstant.primaryColor,
-                            confirmTextColor: Colors.white,
-                            cancelTextColor: ColorConstant.primaryColor,
-                            onConfirm: () {
-                              Get.back();
-                              homeController.logout();
-                            },
-                            onCancel: () => Get.back(),
-                          );
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.black87,
-                          elevation: 0.5,
-                          shape: const RoundedRectangleBorder(
-                            borderRadius: BorderRadius.all(
-                              Radius.circular(10),
-                            ),
-                          ),
-                          minimumSize: const Size.fromHeight(40),
-                        ),
-                        child: const Text(
-                          'Keluar',
-                          style: TextStyle(fontSize: 10),
-                        ),
-                      )
-                  ],
-                ),
-              ),
+            User(
+              constraints: constraints,
             ),
-            Container(
-              margin: const EdgeInsets.only(bottom: 24, right: 24),
-              decoration: BoxDecoration(
-                color: Colors.white60,
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    const Text(
-                      'Aksi Cepat',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(
-                      height: 8,
-                    ),
-                    ListView.builder(
-                      shrinkWrap: true,
-                      primary: false,
-                      padding: EdgeInsets.zero,
-                      itemCount: RightbarConstant.actionList.length,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemBuilder: (context, index) {
-                        if (constraints.maxWidth > 172) {
-                          return Container(
-                            margin: const EdgeInsets.symmetric(vertical: 8),
-                            decoration: BoxDecoration(
-                              color: ColorConstant.backgroundColor,
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: ListTile(
-                              onTap: () {
-                                switch (index) {
-                                  case 0:
-                                    DialogUtil.showDialogAddProduct(context);
-                                    break;
-                                  case 1:
-                                    DialogUtil.showDialogAddTransaction(
-                                      context,
-                                    );
-                                    break;
-                                  case 2:
-                                    mProductController.generateProductDataPdf();
-                                    break;
-                                  case 3:
-                                    DialogUtil.showDialogPdfReport(context);
-                                    break;
-                                }
-                              },
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              title: Text(
-                                RightbarConstant.actionList[index]['title'],
-                                style: const TextStyle(fontSize: 11),
-                              ),
-                              trailing: Icon(
-                                RightbarConstant.actionList[index]['icon'],
-                                size: 20,
-                                color: Colors.black87,
-                              ),
-                            ),
-                          );
-                        }
-                        return Container(
-                          width: 40,
-                          margin: const EdgeInsets.symmetric(vertical: 8),
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: ColorConstant.backgroundColor,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Icon(
-                            RightbarConstant.actionList[index]['icon'],
-                            size: 20,
-                            color: Colors.black87,
-                          ),
-                        );
-                      },
-                    ),
-                  ],
-                ),
-              ),
+            Shortcut(
+              constraints: constraints,
+              mProductController: mProductController,
             )
           ],
         );
       },
+    );
+  }
+}
+
+class Shortcut extends StatelessWidget {
+  Shortcut({
+    Key? key,
+    required this.constraints,
+    required this.mProductController,
+  }) : super(key: key);
+
+  BoxConstraints constraints;
+  ManageProductController mProductController;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 24, right: 24),
+      decoration: BoxDecoration(
+        color: Colors.white60,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const Text(
+              'Aksi Cepat',
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(
+              height: 8,
+            ),
+            ListView.builder(
+              shrinkWrap: true,
+              primary: false,
+              padding: EdgeInsets.zero,
+              itemCount: RightbarConstant.actionList.length,
+              physics: const NeverScrollableScrollPhysics(),
+              itemBuilder: (context, index) {
+                if (constraints.maxWidth > 172) {
+                  return Container(
+                    margin: const EdgeInsets.symmetric(vertical: 8),
+                    decoration: BoxDecoration(
+                      color: ColorConstant.backgroundColor,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: ListTile(
+                      onTap: () {
+                        switch (index) {
+                          case 0:
+                            DialogUtil.showDialogAddProduct(context);
+                            break;
+                          case 1:
+                            DialogUtil.showDialogAddTransaction(
+                              context,
+                            );
+                            break;
+                          case 2:
+                            mProductController.generateProductDataPdf();
+                            break;
+                          case 3:
+                            DialogUtil.showDialogPdfReport(context);
+                            break;
+                        }
+                      },
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      title: Text(
+                        RightbarConstant.actionList[index]['title'],
+                        style: const TextStyle(fontSize: 11),
+                      ),
+                      trailing: Icon(
+                        RightbarConstant.actionList[index]['icon'],
+                        size: 20,
+                        color: Colors.black87,
+                      ),
+                    ),
+                  );
+                }
+                return Container(
+                  width: 40,
+                  margin: const EdgeInsets.symmetric(vertical: 8),
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: ColorConstant.backgroundColor,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(
+                    RightbarConstant.actionList[index]['icon'],
+                    size: 20,
+                    color: Colors.black87,
+                  ),
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class User extends StatelessWidget {
+  BoxConstraints constraints;
+  final homeController = Get.find<HomeController>();
+  User({required this.constraints, super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 24, right: 24, top: 24),
+      decoration: BoxDecoration(
+        color: Colors.white60,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          children: [
+            Image.asset(
+              'assets/images/avatar/ava_female.png',
+              width: 64,
+            ),
+            const SizedBox(
+              height: 8,
+            ),
+            if (constraints.maxWidth > 128)
+              Obx(
+                () {
+                  return Text(
+                    homeController.username.value,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: Colors.black87,
+                    ),
+                    textAlign: TextAlign.center,
+                  );
+                },
+              ),
+            const SizedBox(
+              height: 12,
+            ),
+            if (constraints.maxWidth > 128)
+              ElevatedButton(
+                onPressed: () {
+                  Get.defaultDialog(
+                    contentPadding: const EdgeInsets.all(16),
+                    title: 'Keluar Aplikasi',
+                    middleText: 'Apakah kamu yakin ingin keluar aplikasi ?',
+                    textConfirm: 'Ya',
+                    textCancel: 'Tidak',
+                    buttonColor: ColorConstant.primaryColor,
+                    confirmTextColor: Colors.white,
+                    cancelTextColor: ColorConstant.primaryColor,
+                    onConfirm: () {
+                      Get.back();
+                      homeController.logout();
+                    },
+                    onCancel: () => Get.back(),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.black87,
+                  elevation: 0.5,
+                  shape: const RoundedRectangleBorder(
+                    borderRadius: BorderRadius.all(
+                      Radius.circular(10),
+                    ),
+                  ),
+                  minimumSize: const Size.fromHeight(40),
+                ),
+                child: const Text(
+                  'Keluar',
+                  style: TextStyle(fontSize: 10),
+                ),
+              )
+          ],
+        ),
+      ),
     );
   }
 }
