@@ -765,12 +765,29 @@ class UserTable extends StatelessWidget {
                                       ),
                                       InkWell(
                                         onTap: () {
+                                          if (value.role == 'Super Admin') {
+                                            Get.defaultDialog(
+                                              contentPadding:
+                                                  const EdgeInsets.all(32),
+                                              title: 'Super Admin',
+                                              middleText:
+                                                  'Akun ini tidak dapat dihapus',
+                                              textConfirm: 'Ok',
+                                              buttonColor:
+                                                  ColorConstant.primaryColor,
+                                              confirmTextColor: Colors.white,
+                                              onConfirm: () {
+                                                Get.back();
+                                              },
+                                            );
+                                            return;
+                                          }
                                           Get.defaultDialog(
                                             contentPadding:
                                                 const EdgeInsets.all(32),
-                                            title: 'Hapus Produk',
+                                            title: 'Hapus Pengguna',
                                             middleText:
-                                                'Apakah kamu yakin ingin menghapus produk ini ?',
+                                                'Apakah kamu yakin ingin menghapus pengguna ini ?',
                                             textConfirm: 'Ya',
                                             textCancel: 'Tidak',
                                             buttonColor: Colors.black87,

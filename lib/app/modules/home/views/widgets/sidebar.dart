@@ -84,7 +84,7 @@ class Sidebar extends StatelessWidget {
                       cancelTextColor: ColorConstant.primaryColor,
                       onConfirm: () {
                         Get.back();
-                        Get.toNamed(Routes.LOGIN);
+                        controller.logout();
                       },
                       onCancel: () => Get.back(),
                     );

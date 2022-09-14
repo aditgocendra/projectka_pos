@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:projectka_pos/app/modules/home/controllers/home_controller.dart';
 import 'package:projectka_pos/app/modules/home/controllers/manage_product_controller.dart';
 import 'package:projectka_pos/app/modules/home/controllers/manage_transaction_controller.dart';
-import 'package:projectka_pos/app/routes/app_pages.dart';
 import 'package:projectka_pos/core/constant/color.constant.dart';
 import 'package:projectka_pos/core/constant/rightbar.constant.dart';
 import 'package:projectka_pos/core/utils/dialog.util.dart';
@@ -10,6 +10,7 @@ import 'package:projectka_pos/core/utils/dialog.util.dart';
 class Rightbar extends StatelessWidget {
   final mProductController = Get.find<ManageProductController>();
   final mTransController = Get.find<ManageTransactionController>();
+  final homeController = Get.find<HomeController>();
   Rightbar({Key? key}) : super(key: key);
 
   @override
@@ -60,7 +61,7 @@ class Rightbar extends StatelessWidget {
                             cancelTextColor: ColorConstant.primaryColor,
                             onConfirm: () {
                               Get.back();
-                              Get.toNamed(Routes.LOGIN);
+                              homeController.logout();
                             },
                             onCancel: () => Get.back(),
                           );

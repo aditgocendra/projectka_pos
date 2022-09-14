@@ -761,9 +761,9 @@ class DataTableTransaction extends StatelessWidget {
                                             Get.defaultDialog(
                                               contentPadding:
                                                   const EdgeInsets.all(32),
-                                              title: 'Hapus Produk',
+                                              title: 'Hapus Transaksi',
                                               middleText:
-                                                  'Apakah kamu yakin ingin menghapus produk ini ?',
+                                                  'Apakah kamu yakin ingin menghapus transaksi ini ?',
                                               textConfirm: 'Ya',
                                               textCancel: 'Tidak',
                                               buttonColor: Colors.black87,
