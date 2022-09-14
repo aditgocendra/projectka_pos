@@ -46,6 +46,33 @@ class ManageTransactionController extends GetxController {
   final totalPayTransDetail = 0.obs;
   List<DetailTransactionModel> listDetailTransDialog = [];
 
+  // Search Data Product
+  Future searchData(String keyword) async {
+    isLoadingTableData.toggle();
+
+    await FirestoreService.refTransaction
+        .doc(keyword)
+        .get()
+        .then((result) async {
+      if (!result.exists) {
+        isLoadingTableData.toggle();
+        DialogUtil.dialogSearchNotFound('transaksi');
+        return;
+      }
+
+      listDataTable.clear();
+      TransactionModel transactionModel = TransactionModel(
+        totalPay: result['totalPay'],
+        createdAt: result['createdAt'],
+      );
+
+      transactionModel.idDocument = result.id;
+      listDataTable.add(transactionModel);
+      isLoadingTableData.toggle();
+      update();
+    });
+  }
+
   // Read All Data Transaction
   Future<QuerySnapshot> readAllTransaction() async {
     return await FirestoreService.refTransaction.get();
@@ -368,11 +395,5 @@ class ManageTransactionController extends GetxController {
     }
     isLoadingTableData.toggle();
     update();
-  }
-
-  @override
-  void onInit() {
-    refreshData();
-    super.onInit();
   }
 }

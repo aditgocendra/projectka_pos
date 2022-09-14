@@ -24,6 +24,25 @@ class ManageProductController extends GetxController {
   // Data Product
   List<ProductModel> listProduct = [];
 
+  // Search Data Product
+  Future searchData(String keyword) async {
+    isLoading.toggle();
+    await FirestoreService.refProduct
+        .where('searchKeyword', arrayContains: keyword.toLowerCase())
+        .get()
+        .then((result) {
+      if (result.docs.isEmpty) {
+        isLoading.toggle();
+        DialogUtil.dialogSearchNotFound('produk');
+
+        return;
+      }
+
+      listProduct.clear();
+      fetchProduct(result);
+    });
+  }
+
   // Read Data Product
   Future readProduct() async {
     return await FirestoreService.refProduct.orderBy('createdAt').get();
@@ -178,11 +197,5 @@ class ManageProductController extends GetxController {
     }
     isLoading.toggle();
     update();
-  }
-
-  @override
-  void onInit() {
-    refreshData();
-    super.onInit();
   }
 }
