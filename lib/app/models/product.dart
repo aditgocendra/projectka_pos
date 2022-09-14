@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:projectka_pos/core/utils/string.util.dart';
 
 class ProductModel {
   String productName;
@@ -49,49 +50,15 @@ class ProductModel {
   String getIndex(int index) {
     switch (index) {
       case 0:
-        return 'code product';
-      case 1:
         return productName;
+      case 1:
+        return StringUtil.rupiahFormat(price);
       case 2:
-        return price.toString();
+        return '${stock.toString()} Unit';
       case 3:
-        return stock.toString();
+        return '${sold.toString()} Unit';
       default:
         return '';
     }
   }
 }
-
-final productData = [
-  ProductModel(
-    productName: 'productName',
-    price: 50000,
-    stock: 50,
-    sold: 10,
-    searchKeyword: ['asd'],
-    createdAt: Timestamp.now(),
-  ),
-  ProductModel(
-    productName: 'productName',
-    price: 50000,
-    stock: 50,
-    sold: 10,
-    createdAt: Timestamp.now(),
-  ),
-  ProductModel(
-    productName: 'productName',
-    price: 50000,
-    stock: 50,
-    sold: 10,
-    searchKeyword: ['asd'],
-    createdAt: Timestamp.now(),
-  ),
-  ProductModel(
-    productName: 'productName',
-    price: 50000,
-    stock: 50,
-    sold: 10,
-    searchKeyword: ['asd'],
-    createdAt: Timestamp.now(),
-  )
-];

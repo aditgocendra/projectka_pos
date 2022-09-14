@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:projectka_pos/app/models/detail_transaction.dart';
 
 class TransactionModel {
   int totalPay;
@@ -22,4 +23,18 @@ class TransactionModel {
       'createdAt': createdAt,
     };
   }
+}
+
+class TransactionReport {
+  String codeTransaction;
+  List<DetailTransactionModel> detailTrans;
+  Timestamp dateTransaction;
+  int totalPay;
+
+  TransactionReport({
+    required this.codeTransaction,
+    required this.detailTrans,
+    required this.dateTransaction,
+    required this.totalPay,
+  });
 }

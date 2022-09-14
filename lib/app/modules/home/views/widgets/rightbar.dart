@@ -128,12 +128,12 @@ class Rightbar extends StatelessWidget {
                                       context,
                                     );
                                     break;
-                                  case 2:
-                                    PdfServices.buildPdf(true);
-                                    break;
-                                  case 3:
-                                    PdfServices.buildPdf(false);
-                                    break;
+                                  // case 2:
+                                  //   PdfServices.buildPdf(true);
+                                  //   break;
+                                  // case 3:
+                                  //   PdfServices.buildPdf(false);
+                                  //   break;
                                 }
                               },
                               shape: RoundedRectangleBorder(

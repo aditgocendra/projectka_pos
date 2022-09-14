@@ -5,6 +5,7 @@ import 'package:projectka_pos/app/models/product.dart';
 import 'package:projectka_pos/core/utils/dialog.util.dart';
 import 'package:projectka_pos/core/utils/functions.dart';
 import 'package:projectka_pos/services/firebase/firestore.service.dart';
+import 'package:projectka_pos/services/local/pdf_services.dart';
 
 class ManageProductController extends GetxController {
   // isLoading
@@ -104,6 +105,31 @@ class ManageProductController extends GetxController {
     listProduct.clear();
     final result = await readProduct();
     fetchProduct(result);
+  }
+
+  // Generate Data Product PDF
+  Future generateProductDataPdf() async {
+    List<ProductModel> dataProduct = [];
+
+    final result = await FirestoreService.refProduct.get();
+
+    if (result.docs.isEmpty) {
+      return;
+    }
+
+    for (var doc in result.docs) {
+      ProductModel product = ProductModel(
+        productName: doc['productName'],
+        price: doc['price'],
+        stock: doc['stock'],
+        sold: doc['sold'],
+        createdAt: doc['createdAt'],
+      );
+      product.idDocument = doc.id;
+      dataProduct.add(product);
+    }
+
+    PdfServices.buildPdf(true, dataProduct, '');
   }
 
   // Validation Form Product

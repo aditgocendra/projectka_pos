@@ -1,11 +1,12 @@
+import 'package:calendar_date_picker2/calendar_date_picker2.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:projectka_pos/app/models/product.dart';
 import 'package:projectka_pos/app/modules/home/controllers/manage_transaction_controller.dart';
 import 'package:projectka_pos/core/constant/color.constant.dart';
 import 'package:projectka_pos/core/utils/string.util.dart';
 import 'package:projectka_pos/core/utils/styles.dart';
-import 'package:projectka_pos/services/local/pdf_services.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:unicons/unicons.dart';
 
@@ -31,7 +32,11 @@ class ManageTransaction extends StatelessWidget {
               children: [
                 InkWell(
                   onTap: () {
-                    PdfServices.buildPdf(false);
+                    mTransController.errorMessageReport.value = '';
+                    showDialog(
+                      context: context,
+                      builder: (context) => DialogPdfReport(),
+                    );
                   },
                   child: Container(
                     decoration: const BoxDecoration(
@@ -409,6 +414,113 @@ class DialogFormTransaction extends StatelessWidget {
                   'Simpan',
                   style: TextStyle(fontSize: 14),
                 ),
+              )
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class DialogPdfReport extends StatelessWidget {
+  final mTransactionCtl = Get.find<ManageTransactionController>();
+  DialogPdfReport({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.all(
+          Radius.circular(16),
+        ),
+      ),
+      elevation: 0.5,
+      backgroundColor: Colors.transparent,
+      child: Container(
+        width: 800,
+        padding: const EdgeInsets.all(32.0),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.all(
+            Radius.circular(16),
+          ),
+        ),
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'Buat Laporan',
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                  ),
+                  IconButton(
+                    onPressed: () {
+                      Get.back();
+                    },
+                    icon: const Icon(
+                      UniconsLine.times_circle,
+                      color: ColorConstant.primaryColor,
+                    ),
+                  )
+                ],
+              ),
+              const SizedBox(
+                height: 16,
+              ),
+              CalendarDatePicker2(
+                config: CalendarDatePicker2Config(
+                  calendarType: CalendarDatePicker2Type.range,
+                  selectedDayHighlightColor: ColorConstant.primaryColor,
+                ),
+                onValueChanged: (dates) {
+                  mTransactionCtl.datePickRangeTrans = dates;
+                },
+                initialValue: mTransactionCtl.initRangeDatePicker,
+              ),
+              Obx(
+                () => Text(
+                  mTransactionCtl.errorMessageReport.value,
+                  style: const TextStyle(fontSize: 14, color: Colors.redAccent),
+                ),
+              ),
+              const SizedBox(
+                height: 12,
+              ),
+              Obx(
+                () {
+                  if (mTransactionCtl.isLoadingReportPdf.value) {
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 80),
+                      child: LoadingAnimationWidget.staggeredDotsWave(
+                        color: ColorConstant.primaryColor,
+                        size: 50,
+                      ),
+                    );
+                  }
+                  return ElevatedButton(
+                    onPressed: () {
+                      mTransactionCtl.generatePdfTransaction();
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: ColorConstant.primaryColor,
+                      elevation: 0.5,
+                      shape: const RoundedRectangleBorder(
+                        borderRadius: BorderRadius.all(
+                          Radius.circular(10),
+                        ),
+                      ),
+                      minimumSize: const Size.fromHeight(50),
+                    ),
+                    child: const Text(
+                      'Cetak Laporan',
+                      style: TextStyle(fontSize: 14),
+                    ),
+                  );
+                },
               )
             ],
           ),
