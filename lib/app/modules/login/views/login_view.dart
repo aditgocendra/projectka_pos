@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:projectka_pos/app/routes/app_pages.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:projectka_pos/core/constant/color.constant.dart';
 import 'package:projectka_pos/core/utils/styles.dart';
 import '../controllers/login_controller.dart';
@@ -33,6 +33,7 @@ class LoginView extends GetView<LoginController> {
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 8.0),
                   child: TextField(
+                    controller: controller.emailCtl,
                     style: const TextStyle(fontSize: 14),
                     cursorColor: ColorConstant.primaryColor,
                     decoration: GlobalStyles.formInputDecoration('Email'),
@@ -41,34 +42,53 @@ class LoginView extends GetView<LoginController> {
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 8.0),
                   child: TextField(
+                    controller: controller.passCtl,
                     style: const TextStyle(fontSize: 14),
                     cursorColor: ColorConstant.primaryColor,
                     obscureText: true,
                     decoration: GlobalStyles.formInputDecoration('Kata Sandi'),
                   ),
                 ),
-                const SizedBox(
-                  height: 16,
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    Get.toNamed(Routes.HOME);
-                  },
-                  style: ElevatedButton.styleFrom(
-                    primary: ColorConstant.primaryColor,
-                    elevation: 0.5,
-                    shape: const RoundedRectangleBorder(
-                      borderRadius: BorderRadius.all(
-                        Radius.circular(10),
-                      ),
+                Obx(
+                  () => Text(
+                    controller.errorMessageForm.value,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: Colors.redAccent,
                     ),
-                    minimumSize: const Size.fromHeight(50),
                   ),
-                  child: const Text(
-                    'Masuk',
-                    style: TextStyle(fontSize: 14),
-                  ),
-                )
+                ),
+                const SizedBox(
+                  height: 8,
+                ),
+                Obx(
+                  () {
+                    if (controller.isLoading.value) {
+                      return LoadingAnimationWidget.dotsTriangle(
+                          color: ColorConstant.primaryColor, size: 50);
+                    }
+
+                    return ElevatedButton(
+                      onPressed: () {
+                        controller.login();
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: ColorConstant.primaryColor,
+                        elevation: 0.5,
+                        shape: const RoundedRectangleBorder(
+                          borderRadius: BorderRadius.all(
+                            Radius.circular(10),
+                          ),
+                        ),
+                        minimumSize: const Size.fromHeight(50),
+                      ),
+                      child: const Text(
+                        'Masuk',
+                        style: TextStyle(fontSize: 14),
+                      ),
+                    );
+                  },
+                ),
               ],
             ),
           ),

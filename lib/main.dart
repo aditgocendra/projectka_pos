@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:projectka_pos/core/constant/color.constant.dart';
 import 'package:projectka_pos/firebase_options.dart';
+import 'package:projectka_pos/services/local/shared_pref.dart';
 import 'app/routes/app_pages.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
@@ -12,24 +13,30 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+
+  final user = await SharedPrefService().readCache();
+
   initializeDateFormatting();
   runApp(
-    const App(),
+    App(
+      user: user,
+    ),
   );
 }
 
 class App extends StatelessWidget {
-  const App({
+  dynamic user;
+  App({
+    required this.user,
     Key? key,
   }) : super(key: key);
-  final isLogin = false;
 
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
       title: "Projectka POS",
       debugShowCheckedModeBanner: false,
-      initialRoute: isLogin ? AppPages.INITIAL : Routes.LOGIN,
+      initialRoute: user[0] == null ? Routes.LOGIN : AppPages.INITIAL,
       getPages: AppPages.routes,
       theme: ThemeData(
         backgroundColor: ColorConstant.backgroundColor,
