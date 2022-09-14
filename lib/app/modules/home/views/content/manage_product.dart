@@ -5,7 +5,6 @@ import 'package:projectka_pos/app/modules/home/controllers/manage_product_contro
 import 'package:projectka_pos/core/constant/color.constant.dart';
 import 'package:projectka_pos/core/utils/dialog.util.dart';
 import 'package:projectka_pos/core/utils/styles.dart';
-import 'package:projectka_pos/services/local/pdf_services.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:unicons/unicons.dart';
 
@@ -31,7 +30,7 @@ class ManageProduct extends StatelessWidget {
               children: [
                 InkWell(
                   onTap: () {
-                    PdfServices.buildPdf(true);
+                    mProductController.generateProductDataPdf();
                   },
                   child: Container(
                     decoration: const BoxDecoration(

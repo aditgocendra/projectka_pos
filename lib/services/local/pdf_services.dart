@@ -5,11 +5,15 @@ import 'package:flutter/services.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:projectka_pos/app/models/product.dart';
+import 'package:projectka_pos/app/models/transaction.dart';
+import 'package:projectka_pos/core/utils/string.util.dart';
 
 class PdfServices {
   static String? logo;
+  static String? dateHeader;
 
-  static Future buildPdf(bool content) async {
+  static Future buildPdf(bool content, dynamic data, date) async {
+    dateHeader = date;
     final doc = pw.Document();
 
     // logo = await rootBundle.loadString('assets/images/logo_test.png');
@@ -34,8 +38,8 @@ class PdfServices {
         build: (context) => [
           // contentHeader(context),
           content
-              ? contentTableProduct(context)
-              : contentTableTransaction(context)
+              ? contentTableProduct(context, data)
+              : contentTableTransaction(context, data)
         ],
       ),
     );
@@ -85,12 +89,15 @@ class PdfServices {
     );
   }
 
-  static pw.Widget contentTableProduct(pw.Context context) {
+  static pw.Widget contentTableProduct(
+    pw.Context context,
+    List<ProductModel> productData,
+  ) {
     const tableHeaders = [
-      'Kode Produk',
       'Nama Produk',
       'Harga',
       'Stok',
+      'Terjual',
     ];
 
     return pw.Table.fromTextArray(
@@ -141,6 +148,7 @@ class PdfServices {
 
   static pw.Widget buildHeaderTransaction(pw.Context context) {
     return pw.Column(
+      crossAxisAlignment: pw.CrossAxisAlignment.stretch,
       children: [
         pw.Row(
           crossAxisAlignment: pw.CrossAxisAlignment.start,
@@ -154,136 +162,161 @@ class PdfServices {
             ),
           ],
         ),
+        pw.Text('Periode : $dateHeader',
+            style: const pw.TextStyle(fontSize: 10),
+            textAlign: pw.TextAlign.right),
+        pw.SizedBox(height: 16),
         // Header Table
-        pw.Row(
-          children: [
-            pw.Expanded(
-              child: dataCellCustom(
-                'Kode Transaksi',
-                pw.FontWeight.bold,
+        pw.Container(
+          padding: const pw.EdgeInsets.symmetric(vertical: 8),
+          decoration: const pw.BoxDecoration(
+            border: pw.Border(
+              top: pw.BorderSide(
+                width: 1.0,
+                color: PdfColors.black,
+              ),
+              bottom: pw.BorderSide(
+                width: 1.0,
+                color: PdfColors.black,
               ),
             ),
-            pw.Expanded(
-              child: dataCellCustom(
-                'Produk',
-                pw.FontWeight.bold,
+          ),
+          child: pw.Row(
+            children: [
+              pw.Expanded(
+                child: dataCellCustom(
+                  'Kode Transaksi',
+                  pw.FontWeight.bold,
+                ),
               ),
-            ),
-            pw.Expanded(
-              child: dataCellCustom(
-                'Harga',
-                pw.FontWeight.bold,
+              pw.Expanded(
+                child: dataCellCustom(
+                  'Produk',
+                  pw.FontWeight.bold,
+                ),
               ),
-            ),
-            pw.Expanded(
-              child: dataCellCustom(
-                'Jumlah Pembelian',
-                pw.FontWeight.bold,
+              pw.Expanded(
+                child: dataCellCustom(
+                  'Harga',
+                  pw.FontWeight.bold,
+                ),
               ),
-            ),
-            pw.Expanded(
-              child: dataCellCustom(
-                'Tanggal Transaksi',
-                pw.FontWeight.bold,
+              pw.Expanded(
+                child: dataCellCustom(
+                  'Jumlah Pembelian',
+                  pw.FontWeight.bold,
+                ),
               ),
-            ),
-            pw.Expanded(
-              child: dataCellCustom(
-                'Total Pembayaran',
-                pw.FontWeight.bold,
+              pw.Expanded(
+                child: dataCellCustom(
+                  'Tanggal Transaksi',
+                  pw.FontWeight.bold,
+                ),
               ),
-            ),
-          ],
-        ),
+              pw.Expanded(
+                child: dataCellCustom(
+                  'Total Pembayaran',
+                  pw.FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+        )
       ],
     );
   }
 
-  static pw.Widget contentTableTransaction(pw.Context context) {
+  static pw.Widget contentTableTransaction(
+    pw.Context context,
+    List<TransactionReport> transactionReportData,
+  ) {
     return pw.Column(
-      children: [
-        // Data Table
-        pw.Row(
-          children: [
-            // Kode Transaction
-            pw.Expanded(
-              child: dataCellCustom(
-                'TR-KL-2022-15-05-WBDHABHSBDHW',
-                pw.FontWeight.normal,
-              ),
-            ),
-            // Product
-            pw.Expanded(
-              child: pw.Container(
-                padding: const pw.EdgeInsets.all(4),
-                child: pw.Column(
-                  children: [
-                    dataCellCustom(
-                      'Bunga Bucket',
-                      pw.FontWeight.normal,
-                    ),
-                    dataCellCustom(
-                      'Bunga Flamel',
-                      pw.FontWeight.normal,
-                    ),
-                  ],
+      children: transactionReportData.map(
+        (trans) {
+          return pw.Container(
+            margin: const pw.EdgeInsets.only(top: 8),
+            decoration: const pw.BoxDecoration(
+              border: pw.Border(
+                bottom: pw.BorderSide(
+                  width: 1.0,
+                  color: PdfColors.black,
                 ),
               ),
             ),
-            // Harga
-            pw.Expanded(
-              child: pw.Container(
-                padding: const pw.EdgeInsets.all(4),
-                child: pw.Column(
-                  children: [
-                    dataCellCustom(
-                      'Rp.300.000',
-                      pw.FontWeight.normal,
-                    ),
-                    dataCellCustom(
-                      'Rp.300.000',
-                      pw.FontWeight.normal,
-                    ),
-                  ],
+            child: pw.Row(
+              children: [
+                // Kode Transaction
+                pw.Expanded(
+                  child: dataCellCustom(
+                    trans.codeTransaction,
+                    pw.FontWeight.normal,
+                  ),
                 ),
-              ),
-            ),
-            // Total Item Buy
-            // Harga
-            pw.Expanded(
-              child: pw.Container(
-                padding: const pw.EdgeInsets.all(4),
-                child: pw.Column(
-                  children: [
-                    dataCellCustom(
-                      '4 Unit',
-                      pw.FontWeight.normal,
-                    ),
-                    dataCellCustom(
-                      '2 Unit',
-                      pw.FontWeight.normal,
-                    ),
-                  ],
+                // Product
+                pw.Expanded(
+                  child: pw.Container(
+                    padding: const pw.EdgeInsets.all(4),
+                    child: pw.Column(
+                        children: trans.detailTrans.map(
+                      (detailTrans) {
+                        return dataCellCustom(
+                          detailTrans.productName,
+                          pw.FontWeight.normal,
+                        );
+                      },
+                    ).toList()),
+                  ),
                 ),
-              ),
+                // Harga
+                pw.Expanded(
+                  child: pw.Container(
+                    padding: const pw.EdgeInsets.all(4),
+                    child: pw.Column(
+                      children: trans.detailTrans.map(
+                        (detailTrans) {
+                          return dataCellCustom(
+                            StringUtil.rupiahFormat(detailTrans.price),
+                            pw.FontWeight.normal,
+                          );
+                        },
+                      ).toList(),
+                    ),
+                  ),
+                ),
+                // Total Item Buy
+                pw.Expanded(
+                  child: pw.Container(
+                    padding: const pw.EdgeInsets.all(4),
+                    child: pw.Column(
+                        children: trans.detailTrans.map(
+                      (detailTrans) {
+                        return dataCellCustom(
+                          '${detailTrans.totalBuy} Unit',
+                          pw.FontWeight.normal,
+                        );
+                      },
+                    ).toList()),
+                  ),
+                ),
+                // Date Transaction
+                pw.Expanded(
+                  child: dataCellCustom(
+                    StringUtil.dMMMyFormat(trans.dateTransaction.toDate()),
+                    pw.FontWeight.normal,
+                  ),
+                ),
+                // Price Item
+                pw.Expanded(
+                  child: dataCellCustom(
+                    StringUtil.rupiahFormat(trans.totalPay),
+                    pw.FontWeight.normal,
+                  ),
+                ),
+              ],
             ),
-            // Date Transaction
-            pw.Expanded(
-              child: dataCellCustom(
-                '24 Mar 2022',
-                pw.FontWeight.normal,
-              ),
-            ),
-            // Price Item
-            pw.Expanded(
-              child: dataCellCustom(
-                'Rp.540.000',
-                pw.FontWeight.normal,
-              ),
-            ),
-          ],
-        ),
-      ],
+          );
+        },
+      ).toList(),
     );
   }
 

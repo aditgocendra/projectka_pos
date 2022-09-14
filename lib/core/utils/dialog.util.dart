@@ -23,6 +23,13 @@ class DialogUtil {
     );
   }
 
+  static void showDialogPdfReport(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => DialogPdfReport(),
+    );
+  }
+
   static dialogErrorFromFirebase(int errCode) {
     return Get.defaultDialog(
       contentPadding: const EdgeInsets.all(32),

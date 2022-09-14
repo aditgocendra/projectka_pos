@@ -148,6 +148,7 @@ class WidgetMenu extends StatelessWidget {
                 ),
                 onTap: () {
                   controller.indexSidebarSelected.value = index;
+                  controller.setDataTable();
                 },
                 leading: Icon(
                   icon,
@@ -162,6 +163,7 @@ class WidgetMenu extends StatelessWidget {
               widget = InkWell(
                 onTap: () {
                   controller.indexSidebarSelected.value = index;
+                  controller.setDataTable();
                 },
                 borderRadius: BorderRadius.circular(12),
                 child: Container(

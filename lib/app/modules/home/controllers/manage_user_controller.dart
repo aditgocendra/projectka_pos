@@ -40,6 +40,24 @@ class ManageUserController extends GetxController {
   TextEditingController passEditTec = TextEditingController();
   TextEditingController confPassEditTec = TextEditingController();
 
+  // Search Data User
+  Future searchData(String keyword) async {
+    isLoading.toggle();
+    await FirestoreService.refUsers
+        .where('searchKeyword', arrayContains: keyword.toLowerCase())
+        .get()
+        .then((result) {
+      if (result.docs.isEmpty) {
+        isLoading.toggle();
+        DialogUtil.dialogSearchNotFound('pengguna');
+        return;
+      }
+
+      listUsers.clear();
+      fetchUsers(result);
+    });
+  }
+
   // Read User Data
   Future<QuerySnapshot> readUserData() async {
     return await FirestoreService.refUsers.get();
@@ -275,11 +293,5 @@ class ManageUserController extends GetxController {
     }
     isLoading.toggle();
     update();
-  }
-
-  @override
-  void onInit() async {
-    refreshData();
-    super.onInit();
   }
 }

@@ -7,12 +7,24 @@ import 'package:projectka_pos/app/models/product.dart';
 import 'package:projectka_pos/app/models/transaction.dart';
 import 'package:projectka_pos/core/utils/dialog.util.dart';
 import 'package:projectka_pos/services/firebase/firestore.service.dart';
+import 'package:projectka_pos/services/local/pdf_services.dart';
 
 class ManageTransactionController extends GetxController {
   // Loading
   final isLoadingGetProduct = false.obs;
   final isLoadingTableData = false.obs;
   final isLoadingReportPdf = false.obs;
+
+  // Range Picker Pdf Report
+  List<DateTime?> initRangeDatePicker = [
+    DateTime.now(),
+    DateTime.now().add(const Duration(days: 10)),
+  ];
+
+  List<DateTime?> datePickRangeTrans = [
+    DateTime.now(),
+    DateTime.now().add(const Duration(days: 10)),
+  ];
 
   // Controller
   ScrollController scrollHorizontalCtl = ScrollController();
@@ -33,6 +45,33 @@ class ManageTransactionController extends GetxController {
   final codeTrans = ''.obs;
   final totalPayTransDetail = 0.obs;
   List<DetailTransactionModel> listDetailTransDialog = [];
+
+  // Search Data Product
+  Future searchData(String keyword) async {
+    isLoadingTableData.toggle();
+
+    await FirestoreService.refTransaction
+        .doc(keyword)
+        .get()
+        .then((result) async {
+      if (!result.exists) {
+        isLoadingTableData.toggle();
+        DialogUtil.dialogSearchNotFound('transaksi');
+        return;
+      }
+
+      listDataTable.clear();
+      TransactionModel transactionModel = TransactionModel(
+        totalPay: result['totalPay'],
+        createdAt: result['createdAt'],
+      );
+
+      transactionModel.idDocument = result.id;
+      listDataTable.add(transactionModel);
+      isLoadingTableData.toggle();
+      update();
+    });
+  }
 
   // Read All Data Transaction
   Future<QuerySnapshot> readAllTransaction() async {
@@ -137,7 +176,7 @@ class ManageTransactionController extends GetxController {
     final result = await FirestoreService.refSubCollectionDetailTransaction(
             idDoc: docId,
             collection: 'transactions',
-            subCollectionPath: 'detailTransaction')
+            subCollectionPath: 'detail_transactions')
         .get();
 
     for (var doc in result.docs) {
@@ -231,6 +270,75 @@ class ManageTransactionController extends GetxController {
     fetchTransaction(result);
   }
 
+  // Generate PDF Transaction
+  Future generatePdfTransaction() async {
+    if (datePickRangeTrans.isEmpty || datePickRangeTrans.length <= 1) {
+      errorMessageReport.value = 'Rentang tanggal belum dipilih';
+      return;
+    }
+    isLoadingReportPdf.toggle();
+
+    // Get Transaction Data
+    await FirestoreService.refTransaction
+        .orderBy('createdAt')
+        .where('createdAt', isGreaterThanOrEqualTo: datePickRangeTrans[0])
+        .where('createdAt', isLessThanOrEqualTo: datePickRangeTrans[1])
+        .get()
+        .then((result) async {
+      if (result.docs.isEmpty) {
+        isLoadingReportPdf.toggle();
+        errorMessageReport.value =
+            'Tidak ada transaksi di rentang tanggal tersebut';
+        return;
+      }
+      List<TransactionReport> listReportTransaction = [];
+
+      for (var docTrans in result.docs) {
+        TransactionReport transReport;
+
+        // Detail Transaction
+        final result = await FirestoreService.refSubCollectionDetailTransaction(
+          idDoc: docTrans.id,
+          collection: 'transactions',
+          subCollectionPath: 'detail_transactions',
+        ).get();
+
+        List<DetailTransactionModel> listDetailTrans = [];
+
+        for (var docDetailTrans in result.docs) {
+          DetailTransactionModel detailTrans = DetailTransactionModel(
+            productName: docDetailTrans['productName'],
+            price: docDetailTrans['price'],
+            totalBuy: docDetailTrans['totalBuy'],
+          );
+
+          detailTrans.idDocument = docDetailTrans.id;
+          listDetailTrans.add(detailTrans);
+        }
+
+        transReport = TransactionReport(
+          codeTransaction: docTrans.id,
+          detailTrans: listDetailTrans,
+          dateTransaction: docTrans['createdAt'],
+          totalPay: docTrans['totalPay'],
+        );
+
+        listReportTransaction.add(transReport);
+      }
+
+      String fromToDate =
+          '${DateFormat.yMd().format(datePickRangeTrans[0]!)} - ${DateFormat.yMd().format(datePickRangeTrans[1]!)}';
+
+      await PdfServices.buildPdf(false, listReportTransaction, fromToDate);
+      isLoadingReportPdf.toggle();
+      Get.back();
+    }).catchError((err) {
+      isLoadingReportPdf.toggle();
+      Get.back();
+      DialogUtil.dialogErrorFromFirebase(err);
+    });
+  }
+
   // Generate Code Transaction
   String generateCodeTransaction() {
     DateTime dateTimeNow = DateTime.now();
@@ -257,6 +365,7 @@ class ManageTransactionController extends GetxController {
     totalPay.value = price.toInt();
   }
 
+  // Remove Value || Form
   void removeValueProductForm(int index) {
     if (listProductForm[index]['totalBuy'] > 1) {
       listProductForm[index]['totalBuy'] -= 1;
@@ -286,11 +395,5 @@ class ManageTransactionController extends GetxController {
     }
     isLoadingTableData.toggle();
     update();
-  }
-
-  @override
-  void onInit() {
-    refreshData();
-    super.onInit();
   }
 }
