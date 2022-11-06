@@ -444,9 +444,11 @@ class DataTableProduct extends StatelessWidget {
                                 SizedBox(
                                   width: screenWidth / 10,
                                   child: Center(
-                                    child: Text(
-                                      value.productName,
-                                      textAlign: TextAlign.center,
+                                    child: SelectionArea(
+                                      child: Text(
+                                        value.productName,
+                                        textAlign: TextAlign.center,
+                                      ),
                                     ),
                                   ),
                                 ),
