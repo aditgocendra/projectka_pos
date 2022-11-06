@@ -310,7 +310,7 @@ class DialogFormTransaction extends StatelessWidget {
                         style: const TextStyle(fontSize: 14),
                         cursorColor: ColorConstant.primaryColor,
                         decoration:
-                            GlobalStyles.formInputDecoration('Kode Produk'),
+                            GlobalStyles.formInputDecoration('Nama Produk'),
                       ),
                     ),
                   ),
