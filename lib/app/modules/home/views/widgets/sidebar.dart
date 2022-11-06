@@ -31,7 +31,7 @@ class Sidebar extends StatelessWidget {
               children: [
                 DrawerHeader(
                   child: Image.asset(
-                    'assets/images/logo_test.png',
+                    'assets/images/logo.png',
                   ),
                 ),
                 ListView.builder(
