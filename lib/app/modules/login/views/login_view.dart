@@ -27,7 +27,7 @@ class LoginView extends GetView<LoginController> {
             child: Column(
               children: [
                 Image.asset(
-                  'assets/images/logo_test.png',
+                  'assets/images/logo.png',
                   height: 120,
                 ),
                 Padding(

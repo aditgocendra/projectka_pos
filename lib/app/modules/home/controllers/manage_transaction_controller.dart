@@ -222,39 +222,42 @@ class ManageTransactionController extends GetxController {
 
   // Add Product Form
   Future addProductForm() async {
-    String codeProduct = codeProductTec.text.trim();
-    if (codeProduct.isEmpty) {
+    String nameProduct = codeProductTec.text.trim();
+    if (nameProduct.isEmpty) {
       errorMessageForm.value = 'Field kode produk kosong';
       return;
     }
 
     if (listProductForm.isNotEmpty) {
       final productData = listProductForm
-          .where((element) => element['product'].idDocument == codeProduct);
+          .where((element) => element['product'].productName == nameProduct);
       if (productData.isNotEmpty) {
         errorMessageForm.value = 'Produk telah tersedia';
         return;
       }
     }
 
-    final resultProduct =
-        await FirestoreService.refProduct.doc(codeProduct).get();
+    final resultProduct = await FirestoreService.refProduct
+        .where('productName', isEqualTo: nameProduct)
+        .get();
 
-    if (!resultProduct.exists) {
+    if (resultProduct.docs.isEmpty) {
       errorMessageForm.value = 'Produk tidak ditemukan';
       return;
     }
 
+    ProductModel product = resultProduct.docs[0].data();
+    product.idDocument = resultProduct.docs[0].id;
     // Product Data
-    ProductModel product = ProductModel(
-      productName: resultProduct.get('productName'),
-      price: resultProduct.get('price'),
-      stock: resultProduct.get('stock'),
-      sold: resultProduct.get('sold'),
-      searchKeyword: List<String>.from(resultProduct.get('searchKeyword')),
-      createdAt: resultProduct.get('createdAt'),
-    );
-    product.idDocument = codeProduct;
+    // ProductModel product = ProductModel(
+    //   productName: resultProduct.get('productName'),
+    //   price: resultProduct.get('price'),
+    //   stock: resultProduct.get('stock'),
+    //   sold: resultProduct.get('sold'),
+    //   searchKeyword: List<String>.from(resultProduct.get('searchKeyword')),
+    //   createdAt: resultProduct.get('createdAt'),
+    // );
+    // product.idDocument = codeProduct;
 
     // Add Form Product
     listProductForm.add({'product': product, 'totalBuy': 1});
